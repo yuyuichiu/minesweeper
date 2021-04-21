@@ -1,0 +1,5 @@
+21/4/2021
+-Construct the preliminary web layout of minesweeper
+-Build basic javascript class component of minesweeper board
+-"Connect" web board and js script by getting row and column index by ".parentNode.rowIndex" and ".cellIndex"
+-Glassmorphism in CSS by "backdrop-filter = blur(10px)"
