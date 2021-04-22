@@ -1,3 +1,8 @@
+
+22/4/2021
+-Set up recursive logic of revealing cells
+
+
 21/4/2021
 -Construct the preliminary web layout of minesweeper
 -Build basic javascript class component of minesweeper board

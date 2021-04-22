@@ -1,39 +1,39 @@
 /*
-Client Side
+Client Side:
 Generate Layout
 Flag cells
+Disable revealed cells' onclick function
 
-Js side
+Js side:
 Avoid first hit
-jQuery onclick event, extract html rowIndex
-numbers on empty cell near mine
-rule of expanding
-
+Things to do when win and lose
+win condition
+*/
 
 $(document).ready(function(){
     $(".mine-cell").click(function(){
         let domRowIndex = this.parentNode.rowIndex;
         let domColIndex = this.cellIndex;
 
-        myBoard.method(board[domRowIndex][domColIndex]);
+        myBoard.engage(domRowIndex,domColIndex);
     })
 
     // Unload the loading screen
     $(".loading-screen").css("display","none");
 });
-*/
 
 class MineField{
     constructor(){
-        this.board = [];
-        this.displayBoard = [];
-        this.mines = 10; // default mine countz
+        this.mines = 10; // default mine count
         this.minePos = []; // for mine random generation
     }
     
     boardGenerate(vlen, hlen, mines){
+        this.vlen = vlen;
+        this.hlen = hlen;
         this.board = [];
         this.displayBoard = [];
+        this.revealed = [];
         this.mines = mines || 10;
         if(this.mines > vlen*hlen) throw "Mine exceeds Field Area."
 
@@ -44,7 +44,7 @@ class MineField{
                 this.displayBoard[v] = [];
             for(let h = 0; h < hlen; h++){ // create subarray col space
                 this.board[v][h] = " ";
-                this.displayBoard[v][h] = " ";
+                this.displayBoard[v][h] = "_";
             }
         }
 
@@ -110,19 +110,45 @@ class MineField{
         }
         // Reveal Cell
         this.reveal(vPos, hPos);
+        this.topLayerBoardDisplay();
 
         // Check win condition
-        if(this.board.filter(a => a === "X").length === 0){
+        if(this.board.filter(a => a === "X").length === 0){ // fix this
             /* Things to do when win */
             console.log("You win");
             // show win screen, statistics and ask if play again
         }
     }
 
-    reveal(vPos, hPos){
-        //Reveal itself
-        if(this.displayBoard[vPos][hPos] === " "){
-            this.displayBoard[vPos][hPos] === this.board[vPos][hPos];
+    reveal(vPos, hPos){        
+        /* Rule: if empty, force reveal near number and recur empty  */
+        /* else if number, reveal itself (means it can stop here) */
+        /* else if mine caused by recursive calls, ignore it directly */
+        
+        // Directly exit when position is a mine
+        if(this.board[vPos][hPos] === "X"){ return }
+        // Record reveal history for unrevealed cell
+        let toFind = vPos + "+" + hPos;
+        if(this.revealed.filter(x => x === toFind).length === 0){
+            this.revealed.push(toFind);}
+        // Exit if the cell is revealed already.
+        else { return }
+
+        // Reveal itself
+        if(this.displayBoard[vPos][hPos] === "_")
+            this.displayBoard[vPos][hPos] = this.board[vPos][hPos];
+
+        // If Blank, loop and reveal surroundings
+        if(this.board[vPos][hPos] === " "){
+            for(let vTemp = vPos - 1; vTemp <= vPos + 1; vTemp++){
+                for(let hTemp = hPos - 1; hTemp <= hPos + 1; hTemp++){
+                    // recursive on valid cell
+                    if(vTemp < this.vlen && hTemp < this.hlen && vTemp >= 0 && hTemp >=0){
+                        console.log(vTemp + " " + hTemp);
+                        this.reveal(vTemp,hTemp);
+                    }
+                }
+            }
         }
     }
 }
