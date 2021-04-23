@@ -75,15 +75,16 @@ h1{ text-align: center; }
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     /* Properties */
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     text-align: center;
     cursor: pointer;
-    transition: all 0.2s linear;
+    transition: background-color 0.2s linear, transform 0.4s linear, opacity 0.5s linear;
 }
 
-.mine-cell:hover{
-    background-color: rgba(255,255,255,0.3); }
+.mine-cell-hover:hover{
+    background-color: rgba(255,255,255,0.6);
+}
 
-.mine-cell:active{
+.mine-cell-hover:active{
     background-color: rgba(255,255,255,0.1); }
 

@@ -20,6 +20,8 @@ $(document).ready(function(){
             myBoard.flag(domRowIndex,domColIndex); }
         else{
             myBoard.engage(domRowIndex,domColIndex); }
+        
+        myBoard.test(domRowIndex,domColIndex);
     })
 
     // Toggler between flag mode on & off.
@@ -49,8 +51,8 @@ class MineField{
 
         // Board generation
         for(let v = 0; v < this.vlen; v++){
-            if(!(this.board[v])) // crearte subarray for rows
-                this.board[v] = [];
+            if(!(this.board[v]))
+                this.board[v] = []; //subarray for each row
                 this.displayBoard[v] = [];
             for(let h = 0; h < this.hlen; h++){ // create subarray col space
                 this.board[v][h] = " ";
@@ -68,7 +70,7 @@ class MineField{
         for(let irV = initialV - immuteRadius; irV <= initialV + immuteRadius; irV++){
             for(let irH = initialH - immuteRadius; irH <= initialH + immuteRadius; irH++){
                 // Vaildation check for position
-                if(irV <= this.vlen && irH <= this.hlen && irV >= 0 && irH >= 0){
+                if(irV < this.vlen && irH < this.hlen && irV >= 0 && irH >= 0){
                     immuteCells.push(irV + " " + irH); }
             }
         }
@@ -171,8 +173,10 @@ class MineField{
         else { return }
 
         // Reveal itself
-        if(this.displayBoard[vPos][hPos] === "_")
+        if(this.displayBoard[vPos][hPos] === "_"){
             this.displayBoard[vPos][hPos] = this.board[vPos][hPos];
+            this.test(vPos, hPos);
+        }
 
         // If Blank, loop and reveal surroundings
         if(this.board[vPos][hPos] === " "){
@@ -193,6 +197,14 @@ class MineField{
         
         // Disable / Enable DOM element from bring clickable
         // and display a flag icon.
+    }
+
+    test(v,h){
+        let cells = document.getElementsByClassName("mine-cell");
+        let index = v * this.vlen + h;
+        cells[index].style.transform = "rotateZ(180deg) scale(0)";
+        cells[index].className = cells[index].className.replace(/mine-cell-hover/,"");
+        cells[index].innerText = this.board[v][h];
     }
 }
 
