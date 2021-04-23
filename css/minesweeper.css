@@ -42,6 +42,19 @@ h1{ text-align: center; }
     padding: 6px 24px 6px 24px;
 }
 
+/* Flag Toggle Button */
+.flag-btn{
+    display: block;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%,0);
+    margin: 5px;
+    background-color: inherit;
+    font-size: 30px;
+    border-radius: 5px;
+    border: 1px solid black;
+    padding: 6px 24px 6px 24px;
+}
 
 /* The board */
 .board{
