@@ -1,39 +1,54 @@
 /*
 Client Side:
-Generate Layout
-Flag cells
 Disable revealed cells' onclick function
 
 Js side:
-Avoid first hit
 Things to do when win and lose
-win condition
+Win condition
+User customization
 */
 var flagMode = false;
 
+/* JQuery */
 $(document).ready(function(){
     $(".mine-cell").click(function(){
         let domRowIndex = this.parentNode.rowIndex;
         let domColIndex = this.cellIndex;
 
         if(flagMode){
-            myBoard.flag(domRowIndex,domColIndex); }
+            // Action - flag
+            let action = myBoard.flag(domRowIndex,domColIndex);
+            myBoard.displayFlag(domRowIndex, domColIndex, action);
+        }
         else{
-            myBoard.engage(domRowIndex,domColIndex); }
-        
-        myBoard.test(domRowIndex,domColIndex);
+            // Action - reveal
+            myBoard.engage(domRowIndex,domColIndex);
+            myBoard.display(domRowIndex,domColIndex);
+            myBoard.topLayerBoardDisplay();
+        }
     })
 
     // Toggler between flag mode on & off.
     $(".flag-btn").click(function(){
-        flagMode = flagMode ? false : true;
-        console.log(flagMode);
+        // switch on and off
+        flagMode = flagMode === true ? false : true;
+        // button display switch based on flag mode status
+        if(flagMode){
+            document.getElementsByClassName("fa-flag")[0].style.color = "white";
+            document.getElementsByClassName("flag-btn")[0].style.background = "black";
+        }
+        else{
+            document.getElementsByClassName("fa-flag")[0].style.color = "black";
+            document.getElementsByClassName("flag-btn")[0].style.background = "inherit";
+        }
+        
     })
 
     // Unload the loading screen
     $(".loading-screen").css("display","none");
 });
 
+/* Board as class object, instance => myBoard */
 class MineField{
     constructor(){
         this.mines = 10; // default mine count
@@ -116,7 +131,7 @@ class MineField{
             }
         }
 
-        this.boardDisplay();
+        //this.boardDisplay();
         return this.board
     }
     
@@ -139,6 +154,10 @@ class MineField{
         if(this.revealed.length === 0){
             this.generateMines(vPos, hPos); }
 
+        // Exit if cell is revealed
+        let toFind = vPos + "+" + hPos;
+        if(this.revealed.filter(x => x === toFind).length > 0){ return }
+
         // Lose scenario
         if(this.board[vPos][hPos] == "X"){
             /* Things to do when lost */
@@ -148,7 +167,6 @@ class MineField{
 
         // Reveal Cell
         this.reveal(vPos, hPos);
-        this.topLayerBoardDisplay();
 
         // Check win condition
         if(this.board.filter(a => a === "X").length === 0){ // fix this
@@ -175,7 +193,7 @@ class MineField{
         // Reveal itself
         if(this.displayBoard[vPos][hPos] === "_"){
             this.displayBoard[vPos][hPos] = this.board[vPos][hPos];
-            this.test(vPos, hPos);
+            this.display(vPos, hPos);
         }
 
         // If Blank, loop and reveal surroundings
@@ -192,29 +210,76 @@ class MineField{
     }
 
     flag(vPos, hPos){
-        // Toggle between flagged and unflagged
-        this.displayBoard[vPos][hPos] = this.displayBoard[vPos][hPos] === "F" ? "_" : "F";
-        
+        let tar = this.displayBoard[vPos][hPos];
+        // Toggle between flag and un-flag
+        if(tar !== "F"){
+            this.displayBoard[vPos][hPos] = "F";
+            return "add flag"
+        }
+        else{
+            this.displayBoard[vPos][hPos] = "_";
+            return "remove flag"
+        }
+
         // Disable / Enable DOM element from bring clickable
         // and display a flag icon.
     }
 
-    test(v,h){
+    display(v,h){
+        /* Display reveal results on HTML side */
         let cells = document.getElementsByClassName("mine-cell");
+        let hiddenCells = document.getElementsByClassName("hidden-mine-cell");
         let index = v * this.vlen + h;
+        // The top-layer cell disappears
         cells[index].style.transform = "rotateZ(180deg) scale(0)";
         cells[index].className = cells[index].className.replace(/mine-cell-hover/,"");
         cells[index].innerText = this.board[v][h];
+        // and the bottom layer shows its content, with color
+        hiddenCells[index].innerText = this.board[v][h];
+        // Color Handling
+        switch(this.board[v][h]){
+            // mines
+            case("X"):
+                hiddenCells[index].style.background = "#222";
+                hiddenCells[index].style.color = "red";
+                break;
+            // Different colors for numbers
+            case("1"):
+                hiddenCells[index].style.color = "green";
+                break;
+            case("2"):
+                hiddenCells[index].style.color = "blue";
+                break;
+            case("3"):
+                hiddenCells[index].style.color = "rgb(175, 0, 0)";
+                break;
+            case("4"):
+                hiddenCells[index].style.color = "rgb(169, 0, 175)";
+                break;
+            default:
+                hiddenCells[index].style.color = "white";
+        }
+    }
+
+    displayFlag(v,h,action){
+        /* Display/remove flag icon on HTML side */
+        let cells = document.getElementsByClassName("mine-cell");
+        let index = v * this.vlen + h;
+
+        if(action === "add flag")
+            cells[index].innerHTML = "<img src='icon/myFlag2.png' width='40px' height='40px'>";
+        else
+            cells[index].innerHTML = "";
     }
 }
 
 myBoard = new MineField();
-myBoard.boardGenerate(8,8,10);
-myBoard.boardDisplay();
-myBoard.topLayerBoardDisplay();
+myBoard.boardGenerate(8,8,15);
 
 /*
 console.log(myBoard.mines);
+myBoard.boardDisplay();
+myBoard.topLayerBoardDisplay();
 
 */
 
