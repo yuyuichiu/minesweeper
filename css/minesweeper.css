@@ -35,41 +35,64 @@ body{
     transform: translate(0,-100%);
 }
 
-/* Header & Difficulty Buttons */
+/* Header*/
 h1{
     font-size: 2.5em;
     text-align: center;
 }
 
-.difficulty-btn{
-    display: block;
+/* Board Flex Container */
+.board-container{
+    display: flex;
     position: relative;
+    justify-content: center;
+    align-items: center;
     left: 50%;
     transform: translate(-50%,0);
-    margin: 5px;
-    background-color: inherit;
-    font-size: 30px;
+    padding-bottom: 5px;
+}
+
+.flex-item{
+    position: relative;
+    height: 30px;
+    text-align: center;
+    border: 1px dotted black;
+    flex: 1;
+}
+
+.f-mid{
+    max-width: 60px;
+}
+
+.mode-drop, .reset-btn{
+    position: relative;
     border-radius: 5px;
-    border: 1px solid black;
-    padding: 6px 24px 6px 24px;
+    color: white;
+    background-color: rgb(233, 74, 74);
+    padding: 3px 6px 3px 6px;
+}
+
+.reset-btn{
+    border: 2px solid rgb(214, 25, 25);
+    color: white;
+    background-color: rgb(233, 74, 74);
+}
+
+.mode-drop{
+    display: inline-block;
+    border: 2px solid rgb(21, 133, 6);
+    color: white;
+    background-color: rgb(103, 228, 31);
+    cursor: alias;
 }
 
 /* Flag Toggle Button and its side components */
-.mine-count{
-    display: inline-block;
-    position: absolute;
-    text-align: center;
-    font-size: 1.25em;
-    left: 15%;
-    top: 62%;
-}
-
 .flag-btn{
     display: inline-block;
     position: relative;
     left: 50%;
     transform: translate(-50%,0);
-    margin: 5px;
+    top: 15px;
     background-color: inherit;
     font-size: 1.25em;
     border-radius: 5px;
@@ -77,18 +100,9 @@ h1{
     padding: 6px 12px 6px 12px;
 }
 
-.timer{
-    display: inline-block;
-    position: absolute;
-    text-align: center;
-    font-size: 1.25em;
-    left: 65%;
-    top: 62%;
-}
-
 /* The board */
 .board, .hidden-board{
-    margin-top: 0.7em;
+    margin-top: 2em;
     /* Centering the board */
     position: absolute;
     left: 50%;
@@ -146,5 +160,16 @@ h1{
         min-width: 35px;
         min-height: 35px;
         font-size: 20px;
+    }
+
+    .board-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 10%;
+        margin-right: 10%;
+        padding-bottom: 5px;
+        transform: none;
+        left: 0;
     }
 }
