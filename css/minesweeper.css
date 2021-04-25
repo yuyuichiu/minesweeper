@@ -23,11 +23,24 @@ body{
     width: 100%;
     height: 100%;
     z-index: 50000;
-    background-color: ivory;
+    background: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
+    transition: opacity 0.2s linear;
+}
+
+.loading-screen > p{
+    position: relative;
+    text-align: center;
+    font-size: 3em;
+    top: 50%;
+    transform: translate(0,-100%);
 }
 
 /* Header & Difficulty Buttons */
-h1{ text-align: center; }
+h1{
+    font-size: 2.5em;
+    text-align: center;
+}
+
 .difficulty-btn{
     display: block;
     position: relative;
@@ -41,9 +54,18 @@ h1{ text-align: center; }
     padding: 6px 24px 6px 24px;
 }
 
-/* Flag Toggle Button */
+/* Flag Toggle Button and its side components */
+.mine-count{
+    display: inline-block;
+    position: absolute;
+    text-align: center;
+    font-size: 1.25em;
+    left: 15%;
+    top: 62%;
+}
+
 .flag-btn{
-    display: block;
+    display: inline-block;
     position: relative;
     left: 50%;
     transform: translate(-50%,0);
@@ -53,6 +75,15 @@ h1{ text-align: center; }
     border-radius: 5px;
     border: 1px solid black;
     padding: 6px 12px 6px 12px;
+}
+
+.timer{
+    display: inline-block;
+    position: absolute;
+    text-align: center;
+    font-size: 1.25em;
+    left: 65%;
+    top: 62%;
 }
 
 /* The board */
@@ -73,6 +104,8 @@ h1{ text-align: center; }
     position: relative;
     width: 50px;
     height: 50px;
+    min-width: 50px;
+    min-height: 50px;
     font-size: 20px;
     /* Glassmorphism */
     background-color: rgba(255,255,255,0.35);
@@ -97,8 +130,21 @@ h1{ text-align: center; }
     position: relative;
     width: 50px;
     height: 50px;
+    min-width: 50px;
+    min-height: 50px;
     font-size: 24px;
     text-align: center;
     border: 2px solid rgba(255, 255, 255, 0);
 }
 
+@media(max-width: 410px){
+    h1{ font-size: 1.75em; }
+
+    .mine-cell, .hidden-mine-cell{
+        width: 35px;
+        height: 35px;
+        min-width: 35px;
+        min-height: 35px;
+        font-size: 20px;
+    }
+}

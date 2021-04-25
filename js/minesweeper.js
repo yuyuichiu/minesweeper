@@ -1,34 +1,51 @@
 /*
 Client Side:
-Disable revealed cells' onclick function
+Disable revealed cells' onclick function (not necessary)
 
 Js side:
 Things to do when win and lose
-Win condition
+Timer & its display on right
+Mine count display on left
 User customization
 */
 var flagMode = false;
+var lost = false;
+var won = false;
 
 /* JQuery */
 $(document).ready(function(){
+    // Mine cell on click
     $(".mine-cell").click(function(){
         let domRowIndex = this.parentNode.rowIndex;
         let domColIndex = this.cellIndex;
 
-        if(flagMode){
-            // Action - flag
+        if(flagMode && !lost && !won){
+            // Action to do on flag mode
             let action = myBoard.flag(domRowIndex,domColIndex);
             myBoard.displayFlag(domRowIndex, domColIndex, action);
         }
         else{
-            // Action - reveal
-            myBoard.engage(domRowIndex,domColIndex);
-            myBoard.display(domRowIndex,domColIndex);
-            myBoard.topLayerBoardDisplay();
+            // Action to do on normal mode
+            if(myBoard.displayBoard[domRowIndex][domColIndex] !== "F"){
+                myBoard.engage(domRowIndex,domColIndex);
+                myBoard.display(domRowIndex,domColIndex);
+                // myBoard.topLayerBoardDisplay();
+            }
         }
     })
 
-    // Toggler between flag mode on & off.
+    // Right click flagging
+    $(".mine-cell").on("contextmenu",function(e){
+        let domRowIndex = this.parentNode.rowIndex;
+        let domColIndex = this.cellIndex;
+
+        e.preventDefault();
+        // Action - flag
+        let action = myBoard.flag(domRowIndex,domColIndex);
+        myBoard.displayFlag(domRowIndex, domColIndex, action);
+    })
+
+    // Flag button Toggler between flag mode on & off.
     $(".flag-btn").click(function(){
         // switch on and off
         flagMode = flagMode === true ? false : true;
@@ -45,7 +62,8 @@ $(document).ready(function(){
     })
 
     // Unload the loading screen
-    $(".loading-screen").css("display","none");
+    $(".loading-screen").css("height","0");
+    $(".loading-screen").css("opacity","0");
 });
 
 /* Board as class object, instance => myBoard */
@@ -56,8 +74,8 @@ class MineField{
     }
     
     boardGenerate(vlen, hlen, mines){
-        this.vlen = vlen;         // vertical(y) length
-        this.hlen = hlen;         // horizontal(x) length
+        this.vlen = vlen || 8;    // vertical(y) length
+        this.hlen = hlen || 8;    // horizontal(x) length
         this.board = [];          // the real board with mines and numbers
         this.displayBoard = [];   // the top layer board for display
         this.revealed = [];       // record revealed cells
@@ -78,18 +96,17 @@ class MineField{
     }
     
     generateMines(initialV, initialH){ // arguments = first hit position
-        // Setup immute range based of cells around initial hit
+    // Setup immute range based of cells around initial hit
         let immuteRadius = 1;
         let immuteCells = [];
         // Add affected cell position into immuteCells array
         for(let irV = initialV - immuteRadius; irV <= initialV + immuteRadius; irV++){
             for(let irH = initialH - immuteRadius; irH <= initialH + immuteRadius; irH++){
-                // Vaildation check for position
+                // Validation check for position
                 if(irV < this.vlen && irH < this.hlen && irV >= 0 && irH >= 0){
                     immuteCells.push(irV + " " + irH); }
             }
         }
-        console.log(immuteCells);
 
         // Put mines randomly on board
         while(this.minePos.length < this.mines){
@@ -150,29 +167,59 @@ class MineField{
     }
 
     engage(vPos,hPos){
-        // Generate mine on first click
-        if(this.revealed.length === 0){
-            this.generateMines(vPos, hPos); }
-
+        // Exit if already lost
+        if(lost || won){ return }        
         // Exit if cell is revealed
         let toFind = vPos + "+" + hPos;
         if(this.revealed.filter(x => x === toFind).length > 0){ return }
 
-        // Lose scenario
+        // Generate mine on first click
+        if(this.revealed.length === 0){
+            this.generateMines(vPos, hPos); }
+
+        // LOSE scenario
         if(this.board[vPos][hPos] == "X"){
-            /* Things to do when lost */
-            console.log("You lose");
-            // show lose screen and ask if play again
+            // Reveal other mine cell
+            for(let mp = 0; mp < this.minePos.length; mp++){
+                let mineV = this.minePos[mp].match(/.*(?=\ )/)[0];
+                let mineH = this.minePos[mp].match(/(?<=\ ).*/)[0];
+                this.display(Number(mineV), Number(mineH));
+            }
+            // Display Lose Message and try again button
+            document.getElementById("title").innerText = "You Lose!";
+            // Reveal other cells differently to show final result
+            let cells = document.getElementsByClassName("mine-cell");
+            for(let v = 0; v < this.vlen; v++){
+                for(let h = 0; h < this.hlen; h++){
+                    let index = v * this.vlen + h;
+                    cells[index].innerText = this.board[v][h] === " " ? "0" : this.board[v][h];
+                }
+            }
+            lost = true;
         }
 
-        // Reveal Cell
+        // Reveal cell
         this.reveal(vPos, hPos);
 
-        // Check win condition
-        if(this.board.filter(a => a === "X").length === 0){ // fix this
-            /* Things to do when win */
-            console.log("You win");
-            // show win screen, statistics and ask if play again
+        // Trigger WIN event when successfully revealed all non-mine cells
+        if(this.revealed.length >= this.vlen * this.hlen - this.mines){
+            // Congratulation Messages
+            document.getElementById("title").innerText = "You Win!";
+            // Display all mines in a victory fashion
+            let cells = document.getElementsByClassName("mine-cell");
+            for(let v = 0; v < this.vlen; v++){
+                for(let h = 0; h < this.hlen; h++){
+                    if(this.board[v][h] === "X"){
+                        let index = v * this.vlen + h;
+                        cells[index].style.background = "rgb(255, 247, 128)";
+                        cells[index].innerText = "🍀";
+                    }
+                }
+            }
+            // Again?
+
+
+            won = true;
         }
     }
 
@@ -191,7 +238,7 @@ class MineField{
         else { return }
 
         // Reveal itself
-        if(this.displayBoard[vPos][hPos] === "_"){
+        if(this.displayBoard[vPos][hPos] === "_" || this.displayBoard[vPos][hPos] === "F"){
             this.displayBoard[vPos][hPos] = this.board[vPos][hPos];
             this.display(vPos, hPos);
         }
@@ -226,6 +273,9 @@ class MineField{
     }
 
     display(v,h){
+        // Exit if already lost or won
+        if(lost || won){ return }
+
         /* Display reveal results on HTML side */
         let cells = document.getElementsByClassName("mine-cell");
         let hiddenCells = document.getElementsByClassName("hidden-mine-cell");
@@ -267,14 +317,19 @@ class MineField{
         let index = v * this.vlen + h;
 
         if(action === "add flag")
-            cells[index].innerHTML = "<img src='icon/myFlag2.png' width='40px' height='40px'>";
+            cells[index].innerHTML = "<img src='icon/myFlag2.png' width='30px' height='30px'>";
         else
             cells[index].innerHTML = "";
+    }
+
+    resetBoard(){
+        return
     }
 }
 
 myBoard = new MineField();
-myBoard.boardGenerate(8,8,15);
+myBoard.boardGenerate(8,8,10);
+
 
 /*
 console.log(myBoard.mines);

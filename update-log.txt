@@ -1,4 +1,10 @@
 
+25/4/2021
+-Now you can flag by right clicking, or use the flag button to toggle flag mode on / off.
+-Handle revealing scenarios with flagged cell.
+-Mobile responsive design implemented.
+-Implemented win and lose condition
+
 24/4/2021
 -Setup flag function
 -Introduced font awesome for graphic effects

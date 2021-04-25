@@ -12,20 +12,22 @@
     <!-- Javascript and jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://kit.fontawesome.com/d3cb6e3287.js" crossorigin="anonymous"></script>
-    <script src="js/minesweeper.js"></script>
+    <script src="js/minesweeper.js" delay></script>
 </head>
 <body>
-    <div class="loading-screen">Loading...</div>
+    <div class="loading-screen"><p>Loading...</p></div>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-12">
-                <h1>Welcome to Minesweeper!</h1>
+            <div class="col-12">
+                <h1 id="title">Welcome to Minesweeper!</h1>
                 <!-- Take care of mobile layout in the future -->
                 <!-- <button class="difficulty-btn easy">Easy</button>
                 <button class="difficulty-btn medium">Medium</button>
                 <button class="difficulty-btn hard">Hard</button> -->
                 <!-- Board -->
+                <p class="mine-count">Mines: </p>
                 <button class="flag-btn"><i class="fas fa-flag"></i></button>
+                <p class="timer">Time: </p>
                 <table class="board">
                     <tr>
                         <td class="mine-cell mine-cell-hover"></td>
