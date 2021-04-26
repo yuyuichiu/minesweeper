@@ -25,16 +25,14 @@
                 <button class="difficulty-btn medium">Medium</button>
                 <button class="difficulty-btn hard">Hard</button> -->
                 <!-- Board -->
-                <div class="board-container">
-                    <!-- Plan: discard flex and add fixed offset after center instead -->
-                    <div class="flex-item"><div class="mode-drop">Mode</div></div>
-                    <div class="flex-item f-mid"><button class="flag-btn"><i class="fas fa-flag"></i></button></div>
-                    <div class="flex-item">Time: </div>
-                </div>
-                <div class="board-container">
-                    <div class="flex-item"><button class="reset-btn">Reset</button></div>
-                    <div class="flex-item f-mid"></div>
-                    <div class="flex-item">Mine: </div>
+                <!-- Plan: discard flex and add fixed offset after center instead -->
+                <button class="flag-btn"><i class="fas fa-flag"></i></button>
+                <div class="flex-container">
+                    <div class="mode-dropdown">Mode</div>
+                    <button class="reset-btn">Reset</button>
+                    <div class="flex-placeholder"></div>
+                    <div class="mine-count">M:</div>
+                    <div class="time-count">T:</div>
                 </div>
                 <table class="board">
                     <tr>

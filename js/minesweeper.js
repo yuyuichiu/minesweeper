@@ -95,6 +95,7 @@ class MineField{
         return this.board;
     }
     
+    // Generate Mines, called on initial hit
     generateMines(initialV, initialH){ // arguments = first hit position
     // Setup immute range based of cells around initial hit
         let immuteRadius = 1;
@@ -152,6 +153,7 @@ class MineField{
         return this.board
     }
     
+    // Internal command to print out the actual board
     boardDisplay(){
         console.log("=======Board=======");
         for(let v = 0; v < this.board.length; v++){
@@ -159,6 +161,7 @@ class MineField{
         }
     }
 
+    // Internal command to print out the display board variable
     topLayerBoardDisplay(){
         console.log("=======Board - Top Layer=======");
         for(let v = 0; v < this.displayBoard.length; v++){
@@ -166,6 +169,7 @@ class MineField{
         }
     }
 
+    // Action on clicked cells
     engage(vPos,hPos){
         // Exit if already lost
         if(lost || won){ return }        
@@ -223,6 +227,7 @@ class MineField{
         }
     }
 
+    // Reveal the cell, called by engage() or recursively
     reveal(vPos, hPos){        
         /* Rule: if empty, force reveal near number and recur empty  */
         /* else if number, reveal itself (means it can stop here) */
@@ -255,23 +260,8 @@ class MineField{
             }
         }
     }
-
-    flag(vPos, hPos){
-        let tar = this.displayBoard[vPos][hPos];
-        // Toggle between flag and un-flag
-        if(tar !== "F"){
-            this.displayBoard[vPos][hPos] = "F";
-            return "add flag"
-        }
-        else{
-            this.displayBoard[vPos][hPos] = "_";
-            return "remove flag"
-        }
-
-        // Disable / Enable DOM element from bring clickable
-        // and display a flag icon.
-    }
-
+    
+    // Display effects on revealing the cells
     display(v,h){
         // Exit if already lost or won
         if(lost || won){ return }
@@ -311,6 +301,21 @@ class MineField{
         }
     }
 
+    // Update flag information to displayBoard variable
+    flag(vPos, hPos){
+        let tar = this.displayBoard[vPos][hPos];
+        // Toggle between flag and un-flag
+        if(tar !== "F"){
+            this.displayBoard[vPos][hPos] = "F";
+            return "add flag"
+        }
+        else{
+            this.displayBoard[vPos][hPos] = "_";
+            return "remove flag"
+        }
+    }
+
+    // Handle display of flags
     displayFlag(v,h,action){
         /* Display/remove flag icon on HTML side */
         let cells = document.getElementsByClassName("mine-cell");
@@ -322,8 +327,12 @@ class MineField{
             cells[index].innerHTML = "";
     }
 
-    resetBoard(){
-        return
+    // Reset the game
+    resetBoard(vLen, hLen, mineNum){
+        // Generate new board
+        this.boardGenerate(vLen, hLen);
+        // Renew display elements & remove display flags
+        // Timer, customization issues
     }
 }
 
