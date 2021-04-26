@@ -1,6 +1,7 @@
 
 26/4/2021
 -Create cleaner layout with "display: flex"
+-Added a timer to keep track of game time.
 
 25/4/2021
 -Now you can flag by right clicking, or use the flag button to toggle flag mode on / off.

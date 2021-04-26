@@ -77,7 +77,6 @@ $(document).ready(function(){
 class MineField{
     constructor(){
         this.mines = 10; // default mine count
-        this.minePos = []; // for mine random generation
     }
     
     boardGenerate(vlen, hlen, mines){
@@ -86,7 +85,10 @@ class MineField{
         this.board = [];          // the real board with mines and numbers
         this.displayBoard = [];   // the top layer board for display
         this.revealed = [];       // record revealed cells
-        this.mines = mines || 10;  // mine count, default 10
+        this.mines = mines || 10; // mine count, default 10
+        this.minePos = [];        // for mine random generation
+        this.clock = 0;            // time counter to record game length
+
         if(this.mines > this.vlen*this.hlen) throw "Mine exceeds Field Area."
 
         // Board generation
@@ -156,7 +158,7 @@ class MineField{
             }
         }
 
-        //this.boardDisplay();
+        document.getElementsByClassName("mine-count")[0].innerText = "M: " + this.mines;
         return this.board
     }
     
@@ -186,7 +188,10 @@ class MineField{
 
         // Generate mine on first click
         if(this.revealed.length === 0){
-            this.generateMines(vPos, hPos); }
+            this.generateMines(vPos, hPos);
+            // Activate timer
+            this.gameTimer = setInterval(clockUpdate, 1000);
+        }
 
         // LOSE scenario
         if(this.board[vPos][hPos] == "X"){
@@ -207,6 +212,7 @@ class MineField{
                 }
             }
             lost = true;
+            clearInterval(this.gameTimer);
         }
 
         // Reveal cell
@@ -227,10 +233,8 @@ class MineField{
                     }
                 }
             }
-            // Again?
-
-
             won = true;
+            clearInterval(this.gameTimer);
         }
     }
 
@@ -348,32 +352,25 @@ class MineField{
     }
 }
 
-myBoard = new MineField();
-myBoard.boardGenerate(8,8,10);
-
-// Time data stored on HTML element
-function timerUpdate(){
-    var timer = document.getElementsByClassName(".time-count")
-    var fetched = timer[0].innerText;
-    var currentTime = Number(fetched.replace("Time: ",""));
-
-    timer[0].innerText = "Time: " + String(currentTime + 1);
+// For setInterval to execute
+function clockUpdate(){
+    if(myBoard.clock < 1000){
+        myBoard.clock += 1;     }
+    else{
+        myBoard.clock = "---"   }
+    document.getElementsByClassName("time-count")[0].innerText = "🕑: " + myBoard.clock;
 }
 
-// Activate the time counter
-var gameTimer = setInterval(this.timerUpdate(),1000);
-// When win or lose
-clearInterval(gameTimer);
+myBoard = new MineField();
+myBoard.boardGenerate(8,8,12);
+
+
 
 /*
 console.log(myBoard.mines);
 myBoard.boardDisplay();
 myBoard.topLayerBoardDisplay();
 
-timer: starts at first click, updates every second until win/lose.
-The timer and timeUpdate can be different thing, one stores and one updates the data
-timer shoulds stop after win, or when it goes too far.
-if lose then turn timer to "Time: --"
-On board reset, reset timer value to "0"
+
 */
 

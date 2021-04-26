@@ -59,7 +59,7 @@ h1{
     border-radius: 5px;
     color: white;
     background-color: rgb(233, 74, 74);
-    padding: 3px 6px 3px 6px;
+    padding: 3px 1px 3px 5px;
     margin: 0 10px 0 10px;
     flex: 1;
 }
@@ -177,13 +177,17 @@ h1{
         align-items: center;
         margin-left: 10%;
         margin-right: 10%;
-        padding-bottom: 5px;
-        transform: none;
         left: 0;
     }
 
     .flex-container{
-        margin-left: calc(50% - 280px/2);
-        margin-right: calc(50% - 280px/2);
+        margin-left: calc(50% - 300px/2);
+        margin-right: calc(50% - 300px/2);
+    }
+
+    .flag-btn{
+        position: relative;
+        margin-left: -5px;
+        margin-right: -5px;
     }
 }
