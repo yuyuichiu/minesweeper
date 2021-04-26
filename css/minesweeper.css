@@ -53,10 +53,6 @@ h1{
     align-items: center;
 }
 
-.flex-placeholder{
-    min-width: 50px;
-}
-
 .mode-dropdown, .reset-btn, .mine-count, .time-count{
     display: inline-block;
     position: relative;
@@ -64,6 +60,8 @@ h1{
     color: white;
     background-color: rgb(233, 74, 74);
     padding: 3px 6px 3px 6px;
+    margin: 0 10px 0 10px;
+    flex: 1;
 }
 
 .reset-btn{
@@ -76,6 +74,7 @@ h1{
     border: 2px solid rgb(21, 133, 6);
     color: white;
     background-color: rgb(103, 228, 31);
+    text-align: center;
     cursor: alias;
 }
 
@@ -97,14 +96,17 @@ h1{
 .flag-btn{
     z-index: 100;
     display: inline-block;
-    position: absolute;
+    /* position: absolute;
     left: 50%;
-    transform: translate(-50%,0);
+    transform: translate(-50%,0); */
     background-color: inherit;
     font-size: 20px;
     border-radius: 5px;
     border: 1px solid black;
-    padding: 6px 12px 6px 12px;
+    padding: 6px 0px 6px 0px;
+    margin-left: 12px;
+    margin-right: 12px;
+    flex: 1;
 }
 
 /* The board */

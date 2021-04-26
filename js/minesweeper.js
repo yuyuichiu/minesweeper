@@ -1,11 +1,12 @@
 /*
 Client Side:
 Disable revealed cells' onclick function (not necessary)
+Mine Count display and timer icon
+Customization design
 
 Js side:
 Things to do when win and lose
-Timer & its display on right
-Mine count display on left
+Timer
 User customization
 */
 var flagMode = false;
@@ -59,6 +60,12 @@ $(document).ready(function(){
             document.getElementsByClassName("flag-btn")[0].style.background = "inherit";
         }
         
+    $("reset-btn").click(function(){
+        // Customization Option check (?)
+
+        // Resetting the board
+        myBoard.reset(8,8,10);
+    })
     })
 
     // Unload the loading screen
@@ -332,6 +339,11 @@ class MineField{
         // Generate new board
         this.boardGenerate(vLen, hLen);
         // Renew display elements & remove display flags
+        /* 
+            Ask for new row, column and mines for customization
+            adjust both "board" and "hidden-board"
+            => by remove existing cells & add new mine-cells
+        */
         // Timer, customization issues
     }
 }
@@ -339,11 +351,29 @@ class MineField{
 myBoard = new MineField();
 myBoard.boardGenerate(8,8,10);
 
+// Time data stored on HTML element
+function timerUpdate(){
+    var timer = document.getElementsByClassName(".time-count")
+    var fetched = timer[0].innerText;
+    var currentTime = Number(fetched.replace("Time: ",""));
+
+    timer[0].innerText = "Time: " + String(currentTime + 1);
+}
+
+// Activate the time counter
+var gameTimer = setInterval(this.timerUpdate(),1000);
+// When win or lose
+clearInterval(gameTimer);
 
 /*
 console.log(myBoard.mines);
 myBoard.boardDisplay();
 myBoard.topLayerBoardDisplay();
 
+timer: starts at first click, updates every second until win/lose.
+The timer and timeUpdate can be different thing, one stores and one updates the data
+timer shoulds stop after win, or when it goes too far.
+if lose then turn timer to "Time: --"
+On board reset, reset timer value to "0"
 */
 

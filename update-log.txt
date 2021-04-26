@@ -1,4 +1,7 @@
 
+26/4/2021
+-Create cleaner layout with "display: flex"
+
 25/4/2021
 -Now you can flag by right clicking, or use the flag button to toggle flag mode on / off.
 -Handle revealing scenarios with flagged cell.
