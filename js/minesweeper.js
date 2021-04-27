@@ -1,10 +1,15 @@
 /*
 Client Side:
 Disable revealed cells' onclick function (not necessary)
-Customization design
+Customization design - Varied Cell Sizes
 
 Js side:
-User customization
+User customization - design variable criteria
+
+Issue:
+Click function on newly generated board seems buggy. (fixed)
+Win showcase on newly generated board
+Timer stacks
 */
 var flagMode = false;
 var lost = false;
@@ -16,6 +21,8 @@ $(document).ready(function(){
     $(document).on("click", ".mine-cell", function(){
         let domRowIndex = this.parentNode.rowIndex;
         let domColIndex = this.cellIndex;
+        console.log("domRowIndex: " + domRowIndex);
+        console.log("domColIndex: " + domColIndex);
 
         if(flagMode && !lost && !won){
             // Action to do on flag mode
@@ -67,7 +74,7 @@ $(document).ready(function(){
 
     // Reset Button Onclick function
     $(".reset-btn").click(function(){
-        myBoard.resetBoard(6,6,10);
+        myBoard.resetBoard(6,5,10);
     })
 
     // Custom Reset Button Onclick Function
@@ -78,11 +85,20 @@ $(document).ready(function(){
         
         // Some validations before proceeding
         if(!(userV) && !(userH) && !(userM)){
-            console.log("Insufficient Data.")
+            console.log("Insufficient Data.");
             return
         }
         else if(userV % 1 !== 0 || userH % 1 !== 0 || userM % 1 !== 0){
             console.log("Please provide Integer");
+            return
+        }
+        else if(userV * userH - 9 - 5 - userM < 0){
+            // Area - Immute area - Minimum safe space - MineCount >= 0 -> valid
+            console.log("Please provide wider space to put mines");
+            return
+        }
+        else if(userH < 1){
+            console.log("There is no game without any mines.");
             return
         }
 
@@ -181,6 +197,7 @@ class MineField{
         }
 
         document.getElementsByClassName("mine-count")[0].innerText = "M: " + this.mines;
+        this.boardDisplay();
         return this.board
     }
     
@@ -302,7 +319,9 @@ class MineField{
         /* Display reveal results on HTML side */
         let cells = document.getElementsByClassName("mine-cell");
         let hiddenCells = document.getElementsByClassName("hidden-mine-cell");
-        let index = v * this.vlen + h;
+        let index = v * this.hlen + h;
+        console.log(cells);
+        console.log(hiddenCells);
         // The top-layer cell disappears
         cells[index].style.transform = "rotateZ(180deg) scale(0)";
         cells[index].className = cells[index].className.replace(/mine-cell-hover/,"");
@@ -352,7 +371,7 @@ class MineField{
     displayFlag(v,h,action){
         /* Display/remove flag icon on HTML side */
         let cells = document.getElementsByClassName("mine-cell");
-        let index = v * this.vlen + h;
+        let index = v * this.hlen + h;
 
         if(action === "add flag")
             cells[index].innerHTML = "<img src='icon/myFlag2.png' width='30px' height='30px'>";
@@ -376,30 +395,32 @@ class MineField{
         }
 
         // Add new items into HTML table
+        let count = 0;
         for(let tv = 0; tv < vLen; tv++){
             // Add table rows (<tr>)
-            let newRow = htmlBoard.insertRow(0);
-            let newHiddenRow = htmlHiddenBoard.insertRow(0);
+            let newRow = htmlBoard.insertRow(-1);
+            let newHiddenRow = htmlHiddenBoard.insertRow(-1);
             // Add table cells (<td>)
             for(let th = 0; th < hLen; th++){
-                let newCell = newRow.insertCell(0);
-                let newHiddenCell = newHiddenRow.insertCell(0);
+                let newCell = newRow.insertCell(-1);
+                let newHiddenCell = newHiddenRow.insertCell(-1);
                 // Declare class to new cells
-                newCell.className = "mine-cell mine-cell-hover";  
-                newHiddenCell.className = "hidden-mine-cell";  
+                newCell.className = "mine-cell mine-cell-hover";
+                newCell.innerText = tv * hLen + th;
+                newHiddenCell.className = "hidden-mine-cell";
+                count += 1;
             }
         }
 
         // Generate new board in javascript
+        won = false;
+        lost = false;
         this.boardGenerate(vLen,hLen,mineNum);
+        document.getElementById("title").innerText = "Welcome to Minesweeper!"
         
         // Update time-count and mine-count in HTML display
         document.getElementsByClassName("mine-count")[0].innerText = "M: -";
         document.getElementsByClassName("time-count")[0].innerText = "🕑: 0";
-
-        // Display js board in js console (for testing)
-        this.topLayerBoardDisplay();
-        this.boardDisplay();
     }
 }
 

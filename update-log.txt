@@ -2,7 +2,8 @@
 27/4/2021
 -Implemented Board Reset
 -Updated jQuery code to make it interacts with dynamically created elements
--Added customization feature.
+-Working on customization feature
+-Fixed bug on index calculation (should be V * this.hlen + H)
 
 26/4/2021
 -Create cleaner layout with "display: flex"
