@@ -1,12 +1,9 @@
 /*
 Client Side:
 Disable revealed cells' onclick function (not necessary)
-Mine Count display and timer icon
 Customization design
 
 Js side:
-Things to do when win and lose
-Timer
 User customization
 */
 var flagMode = false;
@@ -15,8 +12,8 @@ var won = false;
 
 /* JQuery */
 $(document).ready(function(){
-    // Mine cell on click
-    $(".mine-cell").click(function(){
+    // Mine cell on click [old: $(".mine-cell").click]
+    $(document).on("click", ".mine-cell", function(){
         let domRowIndex = this.parentNode.rowIndex;
         let domColIndex = this.cellIndex;
 
@@ -35,8 +32,8 @@ $(document).ready(function(){
         }
     })
 
-    // Right click flagging
-    $(".mine-cell").on("contextmenu",function(e){
+    // Right click flagging [dynamic version]
+    $(document).on("contextmenu", ".mine-cell",function(e){
         let domRowIndex = this.parentNode.rowIndex;
         let domColIndex = this.cellIndex;
 
@@ -66,6 +63,31 @@ $(document).ready(function(){
         // Resetting the board
         myBoard.reset(8,8,10);
     })
+    })
+
+    // Reset Button Onclick function
+    $(".reset-btn").click(function(){
+        myBoard.resetBoard(6,6,10);
+    })
+
+    // Custom Reset Button Onclick Function
+    $(".custom-reset-btn").click(function(){
+        let userV = document.getElementById("customV").value;
+        let userH = document.getElementById("customH").value;
+        let userM = document.getElementById("customM").value;
+        
+        // Some validations before proceeding
+        if(!(userV) && !(userH) && !(userM)){
+            console.log("Insufficient Data.")
+            return
+        }
+        else if(userV % 1 !== 0 || userH % 1 !== 0 || userM % 1 !== 0){
+            console.log("Please provide Integer");
+            return
+        }
+
+        // Build a customized board
+        myBoard.resetBoard(userV, userH, userM);
     })
 
     // Unload the loading screen
@@ -338,17 +360,46 @@ class MineField{
             cells[index].innerHTML = "";
     }
 
-    // Reset the game
+    // Resetting the game
     resetBoard(vLen, hLen, mineNum){
-        // Generate new board
-        this.boardGenerate(vLen, hLen);
-        // Renew display elements & remove display flags
-        /* 
-            Ask for new row, column and mines for customization
-            adjust both "board" and "hidden-board"
-            => by remove existing cells & add new mine-cells
-        */
-        // Timer, customization issues
+        let htmlBoard = document.getElementsByClassName("board")[0];
+        let htmlHiddenBoard = document.getElementsByClassName("hidden-board")[0];
+        
+        // Clear current HTML table (board & hidden-board)
+        while(htmlBoard.firstChild){
+            // Clear child of the table while any exists
+            htmlBoard.removeChild(htmlBoard.firstChild);
+        }
+        while(htmlHiddenBoard.firstChild){
+            // Clear child of the lower table while any exists
+            htmlHiddenBoard.removeChild(htmlHiddenBoard.firstChild);
+        }
+
+        // Add new items into HTML table
+        for(let tv = 0; tv < vLen; tv++){
+            // Add table rows (<tr>)
+            let newRow = htmlBoard.insertRow(0);
+            let newHiddenRow = htmlHiddenBoard.insertRow(0);
+            // Add table cells (<td>)
+            for(let th = 0; th < hLen; th++){
+                let newCell = newRow.insertCell(0);
+                let newHiddenCell = newHiddenRow.insertCell(0);
+                // Declare class to new cells
+                newCell.className = "mine-cell mine-cell-hover";  
+                newHiddenCell.className = "hidden-mine-cell";  
+            }
+        }
+
+        // Generate new board in javascript
+        this.boardGenerate(vLen,hLen,mineNum);
+        
+        // Update time-count and mine-count in HTML display
+        document.getElementsByClassName("mine-count")[0].innerText = "M: -";
+        document.getElementsByClassName("time-count")[0].innerText = "🕑: 0";
+
+        // Display js board in js console (for testing)
+        this.topLayerBoardDisplay();
+        this.boardDisplay();
     }
 }
 

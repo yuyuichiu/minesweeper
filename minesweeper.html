@@ -20,19 +20,27 @@
         <div class="row">
             <div class="col-12">
                 <h1 id="title">Welcome to Minesweeper!</h1>
-                <!-- Take care of mobile layout in the future -->
-                <!-- <button class="difficulty-btn easy">Easy</button>
-                <button class="difficulty-btn medium">Medium</button>
-                <button class="difficulty-btn hard">Hard</button> -->
-                <!-- Board -->
-                <!-- Plan: discard flex and add fixed offset after center instead -->
-                
                 <div class="flex-container">
                     <div class="mode-dropdown">Mode</div>
                     <button class="reset-btn">Reset</button>
                     <button class="flag-btn"><i class="fas fa-flag"></i></button>
                     <div class="mine-count">M: -</div>
                     <div class="time-count">🕑: 000</div>
+                </div>
+                <div class="flex-container">
+                    <div>
+                        <label for="customV">V:&nbsp;</label>
+                        <input id="customV" class="custom-inputs" type="number">
+                    </div>
+                    <div>
+                        <label for="customH">H:&nbsp;</label>
+                        <input id="customH" class="custom-inputs" type="number">
+                    </div>
+                    <div>
+                        <label for="customM">Mines:&nbsp;</label>
+                        <input id="customM" class="custom-inputs" type="number">
+                    </div>
+                    <button class="custom-reset-btn">Generate</button>
                 </div>
                 <table class="board">
                     <tr>
@@ -198,6 +206,7 @@
                         <td class="hidden-mine-cell"></td>
                     </tr>
                 </table>
+
             </div>
         </div>
     </div>

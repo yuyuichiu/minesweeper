@@ -1,4 +1,9 @@
 
+27/4/2021
+-Implemented Board Reset
+-Updated jQuery code to make it interacts with dynamically created elements
+-Added customization feature.
+
 26/4/2021
 -Create cleaner layout with "display: flex"
 -Added a timer to keep track of game time.

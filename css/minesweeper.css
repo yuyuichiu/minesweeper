@@ -44,7 +44,7 @@ h1{
 /* Board Flex Container */
 .flex-container{
     display: flex;
-    /* To-do: Add Media Query to adjust margin along with cell size */
+    /* To-do: Dynamic margin based on varied board size */
     margin-left: calc(50% - 400px/2);
     margin-right: calc(50% - 400px/2);
     padding-top: 7.5px;
@@ -53,6 +53,45 @@ h1{
     align-items: center;
 }
 
+/* Customization Input & custom-reset-btn Properties */
+.custom-inputs{
+    width: 60px;
+    background: inherit;
+    border: 3px solid rgb(195, 250, 255);
+    border-radius: 5px;
+    padding: 2px;
+}
+
+.custom-inputs:focus{
+    outline: none;
+    border: 3px solid rgb(255, 255, 255);
+    background: white;
+}
+
+.custom-reset-btn{
+    position: relative;
+    font-weight: 700;
+    border-radius: 3px;
+    padding: 3px 5px 3px 5px;
+    color: rgb(17, 82, 13);
+    border: 3px solid rgb(238, 255, 129);
+    background-color: rgb(185, 255, 115);
+    padding: 3px 7px 3px 7px;;
+}
+
+.custom-reset-btn:hover{
+    border: 3px solid rgb(230, 255, 67);
+    background-color: rgb(162, 255, 70);
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+}
+
+.custom-reset-btn:active{
+    border: 3px solid rgb(221, 255, 0);
+    background-color: rgb(146, 255, 37);
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.3);
+}
+
+/* Functional Button Properties */
 .mode-dropdown, .reset-btn, .mine-count, .time-count{
     display: inline-block;
     position: relative;
@@ -189,5 +228,9 @@ h1{
         position: relative;
         margin-left: -5px;
         margin-right: -5px;
+    }
+
+    .custom-inputs{
+        width: 40px;
     }
 }
