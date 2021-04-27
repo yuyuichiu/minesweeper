@@ -203,11 +203,11 @@ h1{
     h1{ font-size: 1.75em; }
 
     .mine-cell, .hidden-mine-cell{
-        width: 35px;
-        height: 35px;
-        min-width: 35px;
-        min-height: 35px;
-        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+        font-size: 15px;
     }
 
     .board-container{

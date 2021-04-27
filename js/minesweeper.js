@@ -5,11 +5,12 @@ Customization design - Varied Cell Sizes
 
 Js side:
 User customization - design variable criteria
+Preset Modes (Easy, Medium, Hard)
+Default Reset - make it reset to last board size
 
 Issue:
-Click function on newly generated board seems buggy. (fixed)
 Win showcase on newly generated board
-Timer stacks
+Timer stacks when resetting a board while the original game goes on
 */
 var flagMode = false;
 var lost = false;
@@ -21,8 +22,6 @@ $(document).ready(function(){
     $(document).on("click", ".mine-cell", function(){
         let domRowIndex = this.parentNode.rowIndex;
         let domColIndex = this.cellIndex;
-        console.log("domRowIndex: " + domRowIndex);
-        console.log("domColIndex: " + domColIndex);
 
         if(flagMode && !lost && !won){
             // Action to do on flag mode
@@ -63,18 +62,11 @@ $(document).ready(function(){
             document.getElementsByClassName("fa-flag")[0].style.color = "black";
             document.getElementsByClassName("flag-btn")[0].style.background = "inherit";
         }
-        
-    $("reset-btn").click(function(){
-        // Customization Option check (?)
-
-        // Resetting the board
-        myBoard.reset(8,8,10);
-    })
     })
 
     // Reset Button Onclick function
     $(".reset-btn").click(function(){
-        myBoard.resetBoard(6,5,10);
+        myBoard.resetBoard(myBoard.vlen,myBoard.hlen,myBoard.mines);
     })
 
     // Custom Reset Button Onclick Function
@@ -180,7 +172,7 @@ class MineField{
                     // Loop through surrounding cells
                     for(let voffset = v-1; voffset <= v+1; voffset++){
                         for(let hoffset = h-1; hoffset <= h+1; hoffset++){
-                            // Skip cases with invaild cell value
+                            // Skip cases with invalid cell value
                             if(voffset > this.vlen-1 || hoffset > this.hlen-1 || voffset < 0 || hoffset < 0)
                                 continue;
                             else if(!(this.board[voffset][hoffset]))
@@ -197,7 +189,6 @@ class MineField{
         }
 
         document.getElementsByClassName("mine-count")[0].innerText = "M: " + this.mines;
-        this.boardDisplay();
         return this.board
     }
     
@@ -246,7 +237,7 @@ class MineField{
             let cells = document.getElementsByClassName("mine-cell");
             for(let v = 0; v < this.vlen; v++){
                 for(let h = 0; h < this.hlen; h++){
-                    let index = v * this.vlen + h;
+                    let index = v * this.hlen + h;
                     cells[index].innerText = this.board[v][h] === " " ? "0" : this.board[v][h];
                 }
             }
@@ -266,7 +257,7 @@ class MineField{
             for(let v = 0; v < this.vlen; v++){
                 for(let h = 0; h < this.hlen; h++){
                     if(this.board[v][h] === "X"){
-                        let index = v * this.vlen + h;
+                        let index = v * this.hlen + h;
                         cells[index].style.background = "rgb(255, 247, 128)";
                         cells[index].innerText = "🍀";
                     }
@@ -320,8 +311,6 @@ class MineField{
         let cells = document.getElementsByClassName("mine-cell");
         let hiddenCells = document.getElementsByClassName("hidden-mine-cell");
         let index = v * this.hlen + h;
-        console.log(cells);
-        console.log(hiddenCells);
         // The top-layer cell disappears
         cells[index].style.transform = "rotateZ(180deg) scale(0)";
         cells[index].className = cells[index].className.replace(/mine-cell-hover/,"");
@@ -395,7 +384,6 @@ class MineField{
         }
 
         // Add new items into HTML table
-        let count = 0;
         for(let tv = 0; tv < vLen; tv++){
             // Add table rows (<tr>)
             let newRow = htmlBoard.insertRow(-1);
@@ -406,9 +394,7 @@ class MineField{
                 let newHiddenCell = newHiddenRow.insertCell(-1);
                 // Declare class to new cells
                 newCell.className = "mine-cell mine-cell-hover";
-                newCell.innerText = tv * hLen + th;
                 newHiddenCell.className = "hidden-mine-cell";
-                count += 1;
             }
         }
 
@@ -420,6 +406,7 @@ class MineField{
         
         // Update time-count and mine-count in HTML display
         document.getElementsByClassName("mine-count")[0].innerText = "M: -";
+        clearInterval(this.gameTimer);
         document.getElementsByClassName("time-count")[0].innerText = "🕑: 0";
     }
 }
@@ -429,13 +416,12 @@ function clockUpdate(){
     if(myBoard.clock < 1000){
         myBoard.clock += 1;     }
     else{
-        myBoard.clock = "---"   }
+        myBoard.clock = "---";  }
     document.getElementsByClassName("time-count")[0].innerText = "🕑: " + myBoard.clock;
 }
 
 myBoard = new MineField();
 myBoard.boardGenerate(8,8,12);
-
 
 
 /*

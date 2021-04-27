@@ -1,9 +1,12 @@
+Deployed at: https://maxwellyu.netlify.app/
+
+
 
 27/4/2021
 -Implemented Board Reset
 -Updated jQuery code to make it interacts with dynamically created elements
--Working on customization feature
--Fixed bug on index calculation (should be V * this.hlen + H)
+-Customization feature preliminarily implemented.
+-Fixed bug on index calculation (V * this.hlen + H)
 
 26/4/2021
 -Create cleaner layout with "display: flex"
@@ -26,7 +29,6 @@
 
 22/4/2021
 -Set up recursive logic of revealing cells
-
 
 21/4/2021
 -Construct the preliminary web layout of minesweeper
