@@ -15,6 +15,8 @@ Timer stacks when resetting a board while the original game goes on
 var flagMode = false;
 var lost = false;
 var won = false;
+var animation = true;
+var mode = "easy";
 
 /* JQuery */
 $(document).ready(function(){
@@ -101,6 +103,29 @@ $(document).ready(function(){
     // Unload the loading screen
     $(".loading-screen").css("height","0");
     $(".loading-screen").css("opacity","0");
+
+    // Mode button onclick - change board based on default layout
+    $(".mode-btn").click(function(){
+        let mineCell = document.getElementsByClassName("mine-cell");
+        let hiddenMineCell = document.getElementsByClassName("hidden-mine-cell");
+        if(mode === "easy"){
+            mode = "medium";
+            this.innerText = "Medium ";
+            myBoard.resetBoard(16,16,50);
+        }
+        else if(mode === "medium"){
+            mode = "hard";
+            this.innerText = "Hard";
+            myBoard.resetBoard(25,25,250);
+        }
+        else{
+            mode = "easy";
+            this.innerText = "Easy";
+            myBoard.resetBoard(8,8,10);
+
+        }
+    })
+
 });
 
 /* Board as class object, instance => myBoard */
@@ -312,7 +337,13 @@ class MineField{
         let hiddenCells = document.getElementsByClassName("hidden-mine-cell");
         let index = v * this.hlen + h;
         // The top-layer cell disappears
-        cells[index].style.transform = "rotateZ(180deg) scale(0)";
+        if(animation){
+            cells[index].style.transform = "rotateZ(180deg) scale(0)";
+        }
+        else{
+            cells[index].style.transition = "none";
+            cells[index].style.opacity = "0";
+        }
         cells[index].className = cells[index].className.replace(/mine-cell-hover/,"");
         cells[index].innerText = this.board[v][h];
         // and the bottom layer shows its content, with color
@@ -363,7 +394,7 @@ class MineField{
         let index = v * this.hlen + h;
 
         if(action === "add flag")
-            cells[index].innerHTML = "<img src='icon/myFlag2.png' width='30px' height='30px'>";
+            cells[index].innerHTML = "<img src='icon/myFlag2.png' width='15px' height='15px'>";
         else
             cells[index].innerHTML = "";
     }

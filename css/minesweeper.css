@@ -15,6 +15,9 @@ body{
     background-image: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
     background-repeat: no-repeat;
     background-attachment: fixed;
+    /* Minor adjustment for crowded layout */
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 /* Loading Screen */
@@ -92,7 +95,7 @@ h1{
 }
 
 /* Functional Button Properties */
-.mode-dropdown, .reset-btn, .mine-count, .time-count{
+.mode-btn, .reset-btn, .mine-count, .time-count{
     display: inline-block;
     position: relative;
     border-radius: 5px;
@@ -109,12 +112,12 @@ h1{
     background-color: rgb(233, 74, 74);
 }
 
-.mode-dropdown{
+.mode-btn{
     border: 2px solid rgb(21, 133, 6);
     color: white;
     background-color: rgb(103, 228, 31);
     text-align: center;
-    cursor: alias;
+    cursor: pointer;
 }
 
 .mine-count{
@@ -150,11 +153,11 @@ h1{
 
 /* The board */
 .board, .hidden-board{
-    margin-top: 2em;
-    /* Centering the board */
-    position: absolute;
+    overflow-x: auto;
     left: 50%;
     transform: translate(-50%,0);
+    /* Centering the board */
+    position: absolute;
     z-index: 10;
 }
 
@@ -199,8 +202,21 @@ h1{
     border: 2px solid rgba(255, 255, 255, 0);
 }
 
-@media(max-width: 410px){
-    h1{ font-size: 1.75em; }
+@media(max-width: 1300px){
+    h1{
+        font-size: 1.75em;
+        text-align: left;
+        margin-left: 10px;
+    }
+
+    .flex-container{
+        margin-left: 0 !important;
+    }
+
+    .board, .hidden-board{
+        left: 0;
+        transform: none;
+    }
 
     .mine-cell, .hidden-mine-cell{
         width: 20px;

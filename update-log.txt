@@ -1,6 +1,7 @@
 Deployed at: https://maxwellyu.netlify.app/
 
-
+28/4/2021
+-Updated responsive layout to optimize experience when playing on a large board
 
 27/4/2021
 -Implemented Board Reset
