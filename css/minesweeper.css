@@ -113,7 +113,7 @@ h1{
 }
 
 .mode-btn{
-    border: 2px solid rgb(21, 133, 6);
+    border: 2px solid rgb(114, 74, 0);
     color: white;
     background-color: rgb(103, 228, 31);
     text-align: center;
@@ -148,6 +148,8 @@ h1{
     padding: 6px 0px 6px 0px;
     margin-left: 12px;
     margin-right: 12px;
+    min-width: 50px;
+    max-width: 50px;
     flex: 1;
 }
 
@@ -202,6 +204,11 @@ h1{
     border: 2px solid rgba(255, 255, 255, 0);
 }
 
+.flag-icon{
+    width: 35px;
+    height: 35px;
+}
+
 @media(max-width: 1300px){
     h1{
         font-size: 1.75em;
@@ -223,7 +230,7 @@ h1{
         height: 20px;
         min-width: 20px;
         min-height: 20px;
-        font-size: 15px;
+        font-size: 13px;
     }
 
     .board-container{
@@ -248,5 +255,10 @@ h1{
 
     .custom-inputs{
         width: 40px;
+    }
+
+    .flag-icon{
+        width: 15px;
+        height: 15px;
     }
 }

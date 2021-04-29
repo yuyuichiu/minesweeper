@@ -1,21 +1,13 @@
 /*
-Client Side:
-Disable revealed cells' onclick function (not necessary)
-Customization design - Varied Cell Sizes
-
-Js side:
-User customization - design variable criteria
-Preset Modes (Easy, Medium, Hard)
-Default Reset - make it reset to last board size
-
 Issue:
-Win showcase on newly generated board
-Timer stacks when resetting a board while the original game goes on
+Performance get really bad on board size > 200
+Square opening (issue?)
 */
 var flagMode = false;
 var lost = false;
 var won = false;
 var animation = true;
+// Difficulty: Easy: 8*8 & 10 mines | Medium: 16*16 & 50 mines | Hard: 25*25 & 250 mines
 var mode = "easy";
 
 /* JQuery */
@@ -34,8 +26,6 @@ $(document).ready(function(){
             // Action to do on normal mode
             if(myBoard.displayBoard[domRowIndex][domColIndex] !== "F"){
                 myBoard.engage(domRowIndex,domColIndex);
-                myBoard.display(domRowIndex,domColIndex);
-                // myBoard.topLayerBoardDisplay();
             }
         }
     })
@@ -46,9 +36,11 @@ $(document).ready(function(){
         let domColIndex = this.cellIndex;
 
         e.preventDefault();
-        // Action - flag
-        let action = myBoard.flag(domRowIndex,domColIndex);
-        myBoard.displayFlag(domRowIndex, domColIndex, action);
+        // Flag cell and display the flag, while game is running
+        if(!(won) && !(lost)){
+            let action = myBoard.flag(domRowIndex,domColIndex);
+            myBoard.displayFlag(domRowIndex, domColIndex, action);
+        }
     })
 
     // Flag button Toggler between flag mode on & off.
@@ -76,24 +68,32 @@ $(document).ready(function(){
         let userV = document.getElementById("customV").value;
         let userH = document.getElementById("customH").value;
         let userM = document.getElementById("customM").value;
+        let msg = document.getElementById("msg");
         
         // Some validations before proceeding
         if(!(userV) && !(userH) && !(userM)){
-            console.log("Insufficient Data.");
+            msg.innerText = "Insufficient Data.";
+            return
+        }
+        else if(userV > 100 || userH > 100){
+            msg.innerText = "Please limit the board to 50*50";
             return
         }
         else if(userV % 1 !== 0 || userH % 1 !== 0 || userM % 1 !== 0){
-            console.log("Please provide Integer");
+            msg.innerText = "Please provide Integer";
             return
         }
         else if(userV * userH - 9 - 5 - userM < 0){
             // Area - Immute area - Minimum safe space - MineCount >= 0 -> valid
-            console.log("Please provide wider space to put mines");
+            msg.innerText = "Please provide wider space to put mines";
             return
         }
         else if(userH < 1){
-            console.log("There is no game without any mines.");
+            msg.innerText = "There is no game without any mines.";
             return
+        }
+        else{
+            msg.innerText = "Custom Board Generated";
         }
 
         // Build a customized board
@@ -106,23 +106,27 @@ $(document).ready(function(){
 
     // Mode button onclick - change board based on default layout
     $(".mode-btn").click(function(){
-        let mineCell = document.getElementsByClassName("mine-cell");
-        let hiddenMineCell = document.getElementsByClassName("hidden-mine-cell");
+        let modeBtn = document.getElementsByClassName("mode-btn")[0];
         if(mode === "easy"){
             mode = "medium";
-            this.innerText = "Medium ";
+            this.innerText = "Medium";
             myBoard.resetBoard(16,16,50);
+            modeBtn.style.border = "2px solid rgb(114, 74, 0)";
+            modeBtn.style.background = "rgb(255, 163, 77)";
         }
         else if(mode === "medium"){
             mode = "hard";
             this.innerText = "Hard";
             myBoard.resetBoard(25,25,250);
+            modeBtn.style.border = "2px solid red";
+            modeBtn.style.background = "rgb(150, 23, 23)";
         }
         else{
             mode = "easy";
             this.innerText = "Easy";
             myBoard.resetBoard(8,8,10);
-
+            modeBtn.style.border = "2px solid rgb(21, 133, 6)";
+            modeBtn.style.background = "rgb(103, 228, 31)";
         }
     })
 
@@ -161,7 +165,9 @@ class MineField{
     
     // Generate Mines, called on initial hit
     generateMines(initialV, initialH){ // arguments = first hit position
-    // Setup immute range based of cells around initial hit
+        // Timer to test code run time
+        let codeStartTime = new Date();
+        // Setup immute range based of cells around initial hit
         let immuteRadius = 1;
         let immuteCells = [];
         // Add affected cell position into immuteCells array
@@ -214,6 +220,10 @@ class MineField{
         }
 
         document.getElementsByClassName("mine-count")[0].innerText = "M: " + this.mines;
+        // Runtime testing
+        let codeEndTime = new Date();
+        let codeRuntime = (codeEndTime - codeStartTime) / 1000;
+        console.log("Mine generation runtime: " + codeRuntime + "s");
         return this.board
     }
     
@@ -235,11 +245,15 @@ class MineField{
 
     // Action on clicked cells
     engage(vPos,hPos){
+        // Runtime testing Variables
+        let codeStartTime = new Date();
+
+
         // Exit if already lost
         if(lost || won){ return }        
         // Exit if cell is revealed
         let toFind = vPos + "+" + hPos;
-        if(this.revealed.filter(x => x === toFind).length > 0){ return }
+        if(this.revealed.filter(x => x.startsWith(toFind)).length > 0){ return }
 
         // Generate mine on first click
         if(this.revealed.length === 0){
@@ -291,10 +305,18 @@ class MineField{
             won = true;
             clearInterval(this.gameTimer);
         }
+
+        // Runtime testing
+        let codeEndTime = new Date();
+        let codeRuntime = (codeEndTime - codeStartTime) / 1000;
+        console.log("Engage runtime: " + codeRuntime + "s");
     }
 
     // Reveal the cell, called by engage() or recursively
-    reveal(vPos, hPos){        
+    /* !!!Source of evil for performance issue!!! */
+    reveal(vPos, hPos){   
+        let codeStartTime = new Date();
+
         /* Rule: if empty, force reveal near number and recur empty  */
         /* else if number, reveal itself (means it can stop here) */
         /* else if mine caused by recursive calls, ignore it directly */
@@ -325,6 +347,11 @@ class MineField{
                 }
             }
         }
+
+        // Runtime testing
+        let codeEndTime = new Date();
+        let codeRuntime = (codeEndTime - codeStartTime) / 1000;
+        console.log("Reveal runtime: " + codeRuntime + "s");
     }
     
     // Display effects on revealing the cells
@@ -368,6 +395,15 @@ class MineField{
             case("4"):
                 hiddenCells[index].style.color = "rgb(169, 0, 175)";
                 break;
+            case("5"):
+                hiddenCells[index].style.color = "rgb(221, 0, 85)";
+                break;
+            case("6"):
+                hiddenCells[index].style.color = "rgb(233, 212, 22)";
+                break;
+            case("7"):
+                hiddenCells[index].style.color = "rgb(0, 217, 255)";
+                break;
             default:
                 hiddenCells[index].style.color = "white";
         }
@@ -394,7 +430,7 @@ class MineField{
         let index = v * this.hlen + h;
 
         if(action === "add flag")
-            cells[index].innerHTML = "<img src='icon/myFlag2.png' width='15px' height='15px'>";
+            cells[index].innerHTML = "<img src='icon/myFlag2.png' class='flag-icon'>";
         else
             cells[index].innerHTML = "";
     }

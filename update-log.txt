@@ -1,5 +1,10 @@
 Deployed at: https://maxwellyu.netlify.app/
 
+29/4/2021
+-Fixed bug where user can flag after the game ends
+-Make flag button have the same size on all screen size
+-Temporarily limit customization feature to 50*50 until performance issue is fixed.
+
 28/4/2021
 -Updated responsive layout to optimize experience when playing on a large board
 
