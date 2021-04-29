@@ -4,6 +4,9 @@ Deployed at: https://maxwellyu.netlify.app/
 -Fixed bug where user can flag after the game ends
 -Make flag button have the same size on all screen size
 -Temporarily limit customization feature to 50*50 until performance issue is fixed.
+(commit #2)
+-Updated the way to record revealed cells, now it only stores how many cells it revealed.
+-Optimized code so that it will not keep filtering a revealed list to check for existence.
 
 28/4/2021
 -Updated responsive layout to optimize experience when playing on a large board

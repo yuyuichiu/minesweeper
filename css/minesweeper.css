@@ -214,6 +214,7 @@ h1{
         font-size: 1.75em;
         text-align: left;
         margin-left: 10px;
+        margin-right: 10px;
     }
 
     .flex-container{
@@ -254,7 +255,7 @@ h1{
     }
 
     .custom-inputs{
-        width: 40px;
+        min-width: 40px;
     }
 
     .flag-icon{

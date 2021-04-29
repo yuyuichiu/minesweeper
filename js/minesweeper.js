@@ -1,12 +1,18 @@
 /*
+JS:
+Manual cell size mode
+
 Issue:
-Performance get really bad on board size > 200
+Performance get really bad on board size > 50
+Recursion blows up if revealing too much cells
+Displaying too much mine at the end lags too.
 Square opening (issue?)
 */
 var flagMode = false;
 var lost = false;
 var won = false;
 var animation = true;
+var called = 0;
 // Difficulty: Easy: 8*8 & 10 mines | Medium: 16*16 & 50 mines | Hard: 25*25 & 250 mines
 var mode = "easy";
 
@@ -75,7 +81,7 @@ $(document).ready(function(){
             msg.innerText = "Insufficient Data.";
             return
         }
-        else if(userV > 100 || userH > 100){
+        else if(userV > 1000 || userH > 1000){
             msg.innerText = "Please limit the board to 50*50";
             return
         }
@@ -143,7 +149,7 @@ class MineField{
         this.hlen = hlen || 8;    // horizontal(x) length
         this.board = [];          // the real board with mines and numbers
         this.displayBoard = [];   // the top layer board for display
-        this.revealed = [];       // record revealed cells
+        this.revealed = 0;       // record revealed cells
         this.mines = mines || 10; // mine count, default 10
         this.minePos = [];        // for mine random generation
         this.clock = 0;            // time counter to record game length
@@ -252,11 +258,10 @@ class MineField{
         // Exit if already lost
         if(lost || won){ return }        
         // Exit if cell is revealed
-        let toFind = vPos + "+" + hPos;
-        if(this.revealed.filter(x => x.startsWith(toFind)).length > 0){ return }
+        if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){ return }
 
         // Generate mine on first click
-        if(this.revealed.length === 0){
+        if(this.revealed === 0){
             this.generateMines(vPos, hPos);
             // Activate timer
             this.gameTimer = setInterval(clockUpdate, 1000);
@@ -288,7 +293,7 @@ class MineField{
         this.reveal(vPos, hPos);
 
         // Trigger WIN event when successfully revealed all non-mine cells
-        if(this.revealed.length >= this.vlen * this.hlen - this.mines){
+        if(this.revealed >= this.vlen * this.hlen - this.mines){
             // Congratulation Messages
             document.getElementById("title").innerText = "You Win!";
             // Display all mines in a victory fashion
@@ -309,13 +314,15 @@ class MineField{
         // Runtime testing
         let codeEndTime = new Date();
         let codeRuntime = (codeEndTime - codeStartTime) / 1000;
+        console.log(called);
         console.log("Engage runtime: " + codeRuntime + "s");
+        console.log(this.revealed);
     }
 
     // Reveal the cell, called by engage() or recursively
     /* !!!Source of evil for performance issue!!! */
     reveal(vPos, hPos){   
-        let codeStartTime = new Date();
+        called += 1;
 
         /* Rule: if empty, force reveal near number and recur empty  */
         /* else if number, reveal itself (means it can stop here) */
@@ -325,10 +332,10 @@ class MineField{
         if(this.board[vPos][hPos] === "X"){ return }
         // Record reveal history for unrevealed cell
         let toFind = vPos + "+" + hPos;
-        if(this.revealed.filter(x => x === toFind).length === 0){
-            this.revealed.push(toFind);}
         // Exit if the cell is revealed already.
-        else { return }
+        if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){
+            return }
+        else { this.revealed += 1; }
 
         // Reveal itself
         if(this.displayBoard[vPos][hPos] === "_" || this.displayBoard[vPos][hPos] === "F"){
@@ -347,11 +354,6 @@ class MineField{
                 }
             }
         }
-
-        // Runtime testing
-        let codeEndTime = new Date();
-        let codeRuntime = (codeEndTime - codeStartTime) / 1000;
-        console.log("Reveal runtime: " + codeRuntime + "s");
     }
     
     // Display effects on revealing the cells
@@ -439,6 +441,7 @@ class MineField{
     resetBoard(vLen, hLen, mineNum){
         let htmlBoard = document.getElementsByClassName("board")[0];
         let htmlHiddenBoard = document.getElementsByClassName("hidden-board")[0];
+        called = 0;
         
         // Clear current HTML table (board & hidden-board)
         while(htmlBoard.firstChild){
