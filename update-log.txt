@@ -1,5 +1,11 @@
 Deployed at: https://maxwellyu.netlify.app/
 
+
+30/4/2021
+-Added new feature: Left+Right click on a revealed number cell after flagging that amount of cell will automatically reveal its surroundings for you.
+(When you flagged 3 cells near a "3" cell, all surrounding unrevealed cells will be unfolded.)
+(Mines will also be revealed through this way, you cannot exploit this :D)
+
 29/4/2021
 -Fixed bug where user can flag after the game ends
 -Make flag button have the same size on all screen size
