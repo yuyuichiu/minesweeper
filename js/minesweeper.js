@@ -36,6 +36,20 @@ $(document).ready(function(){
         }
     })
 
+    // Left+Right click on revealed number cells
+    $(document).on("mousedown", ".mine-cell", function(e){
+        // e.buttons for left = 1, right = 2, 1+2=3 (left+right)
+        if(e.buttons === 3){
+            // Get cell row and column index
+            let domRow = this.parentNode.rowIndex;
+            let domCol = this.cellIndex;
+            console.log(domRow + " " + domCol);
+    
+            // Reveal number around
+            myBoard.cleave(domRow,domCol);
+        }
+    })
+
     // Right click flagging [dynamic version]
     $(document).on("contextmenu", ".mine-cell",function(e){
         let domRowIndex = this.parentNode.rowIndex;
@@ -106,10 +120,6 @@ $(document).ready(function(){
         myBoard.resetBoard(userV, userH, userM);
     })
 
-    // Unload the loading screen
-    $(".loading-screen").css("height","0");
-    $(".loading-screen").css("opacity","0");
-
     // Mode button onclick - change board based on default layout
     $(".mode-btn").click(function(){
         let modeBtn = document.getElementsByClassName("mode-btn")[0];
@@ -135,7 +145,10 @@ $(document).ready(function(){
             modeBtn.style.background = "rgb(103, 228, 31)";
         }
     })
-
+    
+    // Unload the loading screen
+    $(".loading-screen").css("height","0");
+    $(".loading-screen").css("opacity","0");
 });
 
 /* Board as class object, instance => myBoard */
@@ -319,6 +332,47 @@ class MineField{
         console.log(this.revealed);
     }
 
+    // Special action for exposed numbers
+    cleave(vPos, hPos){
+        let vOffset = [-1,-1,-1,0,0,1,1,1];
+        let hOffset = [-1,0,1,-1,1,-1,0,1];
+        // Proceed if not an exposed number
+        if(/[0-8]/.test(String(this.displayBoard[vPos][hPos]))){
+            // Exit if not flagged all surrounding mines accurately
+            for(let i = 0; i < 8; i++){
+                // Handle surrounding loop
+                let lookupV = vPos + vOffset[i];
+                let lookupH = hPos + hOffset[i];
+                console.log(lookupV + " " + lookupH);
+                if(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < -0){
+                    console.log("Invalid cell detected, skipped");
+                    continue;
+                }
+                // The actual check
+                if(this.board[lookupV][lookupH] === "X" && this.displayBoard[lookupV][lookupH] !== "F"){
+                    console.log("Inaccurate flag");
+                    return
+                }
+            }
+
+            // Test passes, reveal surrounding unrevealed cells
+            for(let i = 0; i < 8; i++){
+                // Handle surrounding loop
+                let lookupV = vPos + vOffset[i];
+                let lookupH = hPos + hOffset[i];
+                if(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < -0){
+                    console.log("Invalid cell detected, skipped");
+                    continue;
+                }
+                // reveal unrevealed cells
+                if(this.board[lookupV][lookupH] !== this.displayBoard[lookupV][lookupH]){
+                    this.reveal(lookupV,lookupH);
+                }
+            }
+        }
+        else{ console.log("Number reveal not triggered"); }
+    }
+
     // Reveal the cell, called by engage() or recursively
     /* !!!Source of evil for performance issue!!! */
     reveal(vPos, hPos){   
@@ -494,11 +548,29 @@ myBoard = new MineField();
 myBoard.boardGenerate(8,8,12);
 
 
+
 /*
 console.log(myBoard.mines);
 myBoard.boardDisplay();
 myBoard.topLayerBoardDisplay();
 
+// Left + right click event listener
+var mouseTrack = {};
+var cells = document.getElementsByClassName("mine-cell");
+cells.onmousedown = cells.onmouseup = holding;
+
+function holding(e){
+    e = e || event;
+    if(e.buttons === 3){
+        // Get cell row and column index
+        let domRow = this.parentNode.rowIndex;
+        let domCol = this.cellIndex;
+        console.log(domRow + " " + domCol);
+
+        // Reveal number around
+        myBoard.cleave(domRow,domCol);
+    }
+}
 
 */
 
