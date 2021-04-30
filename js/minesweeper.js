@@ -1,6 +1,7 @@
 /*
 JS:
 Manual cell size mode
+LR click mouse down highlight unrevealed and un-flagged area
 
 Issue:
 Performance get really bad on board size > 50
@@ -267,10 +268,8 @@ class MineField{
         // Runtime testing Variables
         let codeStartTime = new Date();
 
-
-        // Exit if already lost
+        // Exit if already lost, won or cell is revealed
         if(lost || won){ return }        
-        // Exit if cell is revealed
         if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){ return }
 
         // Generate mine on first click
@@ -336,6 +335,7 @@ class MineField{
     cleave(vPos, hPos){
         let vOffset = [-1,-1,-1,0,0,1,1,1];
         let hOffset = [-1,0,1,-1,1,-1,0,1];
+        let flagCount = 0;
         // Proceed if not an exposed number
         if(/[0-8]/.test(String(this.displayBoard[vPos][hPos]))){
             // Exit if not flagged all surrounding mines accurately
@@ -349,24 +349,25 @@ class MineField{
                     continue;
                 }
                 // The actual check
-                if(this.board[lookupV][lookupH] === "X" && this.displayBoard[lookupV][lookupH] !== "F"){
-                    console.log("Inaccurate flag");
-                    return
+                if(this.displayBoard[lookupV][lookupH] === "F"){
+                    flagCount += 1;
                 }
             }
 
             // Test passes, reveal surrounding unrevealed cells
-            for(let i = 0; i < 8; i++){
-                // Handle surrounding loop
-                let lookupV = vPos + vOffset[i];
-                let lookupH = hPos + hOffset[i];
-                if(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < -0){
-                    console.log("Invalid cell detected, skipped");
-                    continue;
-                }
-                // reveal unrevealed cells
-                if(this.board[lookupV][lookupH] !== this.displayBoard[lookupV][lookupH]){
-                    this.reveal(lookupV,lookupH);
+            if(flagCount === Number(this.board[vPos][hPos])){
+                for(let i = 0; i < 8; i++){
+                    // Handle surrounding loop
+                    let lookupV = vPos + vOffset[i];
+                    let lookupH = hPos + hOffset[i];
+                    if(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < 0){
+                        console.log("Invalid cell detected, skipped");
+                        continue;
+                    }
+                    // reveal un-flagged cells (unrevealed will be handled by engage().)
+                    if(this.displayBoard[lookupV][lookupH] !== "F"){
+                        this.engage(lookupV,lookupH);
+                    }
                 }
             }
         }
@@ -376,23 +377,19 @@ class MineField{
     // Reveal the cell, called by engage() or recursively
     /* !!!Source of evil for performance issue!!! */
     reveal(vPos, hPos){   
-        called += 1;
-
         /* Rule: if empty, force reveal near number and recur empty  */
         /* else if number, reveal itself (means it can stop here) */
         /* else if mine caused by recursive calls, ignore it directly */
+        called += 1;
         
         // Directly exit when position is a mine
         if(this.board[vPos][hPos] === "X"){ return }
-        // Record reveal history for unrevealed cell
-        let toFind = vPos + "+" + hPos;
         // Exit if the cell is revealed already.
-        if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){
-            return }
+        if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){ return }
         else { this.revealed += 1; }
 
         // Reveal itself
-        if(this.displayBoard[vPos][hPos] === "_" || this.displayBoard[vPos][hPos] === "F"){
+        if(["_","F"].indexOf(this.displayBoard[vPos][hPos]) >= 0){
             this.displayBoard[vPos][hPos] = this.board[vPos][hPos];
             this.display(vPos, hPos);
         }
@@ -402,7 +399,7 @@ class MineField{
             for(let vTemp = vPos - 1; vTemp <= vPos + 1; vTemp++){
                 for(let hTemp = hPos - 1; hTemp <= hPos + 1; hTemp++){
                     // recursive on valid cell
-                    if(vTemp < this.vlen && hTemp < this.hlen && vTemp >= 0 && hTemp >=0){
+                    if(vTemp < this.vlen && hTemp < this.hlen && vTemp >= 0 && hTemp >= 0){
                         this.reveal(vTemp,hTemp);
                     }
                 }
@@ -410,7 +407,7 @@ class MineField{
         }
     }
     
-    // Display effects on revealing the cells
+    // Display CSS effects on revealing the cells
     display(v,h){
         // Exit if already lost or won
         if(lost || won){ return }
@@ -467,15 +464,18 @@ class MineField{
 
     // Update flag information to displayBoard variable
     flag(vPos, hPos){
-        let tar = this.displayBoard[vPos][hPos];
-        // Toggle between flag and un-flag
-        if(tar !== "F"){
-            this.displayBoard[vPos][hPos] = "F";
-            return "add flag"
-        }
-        else{
-            this.displayBoard[vPos][hPos] = "_";
-            return "remove flag"
+        let target = this.displayBoard[vPos][hPos];
+        // Proceed if cell is unrevealed
+        if(target !== this.board[vPos][hPos]){
+            // Toggle between flag and un-flag
+            if(target !== "F"){
+                this.displayBoard[vPos][hPos] = "F";
+                return "add flag"
+            }
+            else{
+                this.displayBoard[vPos][hPos] = "_";
+                return "remove flag"
+            }
         }
     }
 
