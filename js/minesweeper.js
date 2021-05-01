@@ -1,7 +1,6 @@
 /*
 JS:
 Manual cell size mode
-LR click mouse down highlight unrevealed and un-flagged area
 
 Issue:
 Performance get really bad on board size > 50
@@ -13,6 +12,7 @@ var flagMode = false;
 var lost = false;
 var won = false;
 var animation = true;
+var holding = false; // For lift + right click on mouse up purpose
 var called = 0;
 // Difficulty: Easy: 8*8 & 10 mines | Medium: 16*16 & 50 mines | Hard: 25*25 & 250 mines
 var mode = "easy";
@@ -37,17 +37,30 @@ $(document).ready(function(){
         }
     })
 
-    // Left+Right click on revealed number cells
+    // Left+Right click - onmousedown: highlight effected area
     $(document).on("mousedown", ".mine-cell", function(e){
         // e.buttons for left = 1, right = 2, 1+2=3 (left+right)
         if(e.buttons === 3){
-            // Get cell row and column index
+            holding = true;
+
+            // Highlight affected surrounding cell (CSS effect)
             let domRow = this.parentNode.rowIndex;
             let domCol = this.cellIndex;
-            console.log(domRow + " " + domCol);
-    
-            // Reveal number around
-            myBoard.cleave(domRow,domCol);
+            myBoard.highlight(domRow,domCol);
+        }
+    })
+
+    // Left+Right click - onmouseup: reveal surroundings of number cell
+    $(document).on("mouseup",".mine-cell", function(e){
+        if(holding && e.buttons === 0){
+            holding = false;
+
+            // Attempt to reveal surrounding
+            let domRow = this.parentNode.rowIndex;
+            let domCol = this.cellIndex;
+            myBoard.leftRightReveal(domRow,domCol);
+            // Un-highlight css effect
+            myBoard.highlight(domRow,domCol,"revert");
         }
     })
 
@@ -332,7 +345,7 @@ class MineField{
     }
 
     // Special action for exposed numbers
-    cleave(vPos, hPos){
+    leftRightReveal(vPos, hPos){
         let vOffset = [-1,-1,-1,0,0,1,1,1];
         let hOffset = [-1,0,1,-1,1,-1,0,1];
         let flagCount = 0;
@@ -343,9 +356,8 @@ class MineField{
                 // Handle surrounding loop
                 let lookupV = vPos + vOffset[i];
                 let lookupH = hPos + hOffset[i];
-                console.log(lookupV + " " + lookupH);
-                if(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < -0){
-                    console.log("Invalid cell detected, skipped");
+                if(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < 0){
+                    // Skip cells with invalid lookup value
                     continue;
                 }
                 // The actual check
@@ -354,17 +366,17 @@ class MineField{
                 }
             }
 
-            // Test passes, reveal surrounding unrevealed cells
+            // When condition suffices, Reveal surrounding unrevealed cells
             if(flagCount === Number(this.board[vPos][hPos])){
                 for(let i = 0; i < 8; i++){
                     // Handle surrounding loop
                     let lookupV = vPos + vOffset[i];
                     let lookupH = hPos + hOffset[i];
                     if(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < 0){
-                        console.log("Invalid cell detected, skipped");
+                        // Skip cells with invalid lookup value
                         continue;
                     }
-                    // reveal un-flagged cells (unrevealed will be handled by engage().)
+                    // Help user click un-flagged cells
                     if(this.displayBoard[lookupV][lookupH] !== "F"){
                         this.engage(lookupV,lookupH);
                     }
@@ -459,6 +471,31 @@ class MineField{
                 break;
             default:
                 hiddenCells[index].style.color = "white";
+        }
+    }
+
+    // Highlight cells in response to left+right click
+    highlight(v,h,action){
+        // Proceed if target is an exposed number cell
+        if(/[1-8]/.test(this.displayBoard[v][h])){
+            let vOffset = [-1,-1,-1,0,0,1,1,1];
+            let hOffset = [-1,0,1,-1,1,-1,0,1];
+            let cells = document.getElementsByClassName("mine-cell");
+            // Loop through its surroundings;
+            for(let i = 0; i < 8; i++){
+                let lookupV = v + vOffset[i];
+                let lookupH = h + hOffset[i];
+                let index = lookupV * this.hlen + lookupH;
+                // CHange effect for valid cells
+                if(!(lookupV > this.vlen-1 || lookupH > this.hlen-1 || lookupV < 0 || lookupH < 0)){
+                    if(action === "revert"){
+                        cells[index].style.backgroundColor = "rgba(255,255,255,0.35)";
+                    }
+                    else if(this.displayBoard[lookupV][lookupH] !== "F"){
+                        cells[index].style.backgroundColor = "rgba(255,255,255,0.7)";
+                    }
+                }
+            }
         }
     }
 
@@ -568,7 +605,7 @@ function holding(e){
         console.log(domRow + " " + domCol);
 
         // Reveal number around
-        myBoard.cleave(domRow,domCol);
+        myBoard.leftRightReveal(domRow,domCol);
     }
 }
 
