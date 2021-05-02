@@ -1,5 +1,10 @@
 Deployed at: https://maxwellyu.netlify.app/
 
+2/5/2021
+-Improved algorithm of revealing so that it runs efficiently.
+-Reveal animation will be automatically turned off for large boards
+
+
 1/5/2021
 -Left+Right click now highlight cells when pressed down, and attempt to reveal after mouse release.
 

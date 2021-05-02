@@ -12,7 +12,7 @@
     <!-- Javascript and jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://kit.fontawesome.com/d3cb6e3287.js" crossorigin="anonymous"></script>
-    <script src="js/minesweeper.js" delay></script>
+    <script src="js/minesweeper.js" async></script>
 </head>
 <body>
     <div class="loading-screen"><p>Loading...</p></div>
@@ -43,7 +43,7 @@
                     <button class="custom-reset-btn">Generate</button>
                 </div>
                 <div class="flex-container">
-                    <div id="msg">Issue: large board beyond 50*50 suffers from performance issue.</div>
+                    <div id="msg">Maximum board area: 2500 cells</div>
                 </div>
                 <table class="board">
                     <tr>

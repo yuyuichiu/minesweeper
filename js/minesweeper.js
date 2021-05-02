@@ -7,13 +7,16 @@ Performance get really bad on board size > 50
 Recursion blows up if revealing too much cells
 Displaying too much mine at the end lags too.
 Square opening (issue?)
+
+Cannot surround reveal blank properly
 */
 var flagMode = false;
 var lost = false;
 var won = false;
 var animation = true;
 var holding = false; // For lift + right click on mouse up purpose
-var called = 0;
+var vOffset = [-1,-1,-1,0,0,1,1,1];
+var hOffset = [-1,0,1,-1,1,-1,0,1];
 // Difficulty: Easy: 8*8 & 10 mines | Medium: 16*16 & 50 mines | Hard: 25*25 & 250 mines
 var mode = "easy";
 
@@ -40,7 +43,7 @@ $(document).ready(function(){
     // Left+Right click - onmousedown: highlight effected area
     $(document).on("mousedown", ".mine-cell", function(e){
         // e.buttons for left = 1, right = 2, 1+2=3 (left+right)
-        if(e.buttons === 3){
+        if(e.buttons === 3 && !(won) && !(lost)){
             holding = true;
 
             // Highlight affected surrounding cell (CSS effect)
@@ -52,7 +55,7 @@ $(document).ready(function(){
 
     // Left+Right click - onmouseup: reveal surroundings of number cell
     $(document).on("mouseup",".mine-cell", function(e){
-        if(holding && e.buttons === 0){
+        if(holding && e.buttons === 0 && !(won) && !(lost)){
             holding = false;
 
             // Attempt to reveal surrounding
@@ -99,9 +102,9 @@ $(document).ready(function(){
 
     // Custom Reset Button Onclick Function
     $(".custom-reset-btn").click(function(){
-        let userV = document.getElementById("customV").value;
-        let userH = document.getElementById("customH").value;
-        let userM = document.getElementById("customM").value;
+        let userV = Math.abs(document.getElementById("customV").value);
+        let userH = Math.abs(document.getElementById("customH").value);
+        let userM = Math.abs(document.getElementById("customM").value);
         let msg = document.getElementById("msg");
         
         // Some validations before proceeding
@@ -109,17 +112,17 @@ $(document).ready(function(){
             msg.innerText = "Insufficient Data.";
             return
         }
-        else if(userV > 1000 || userH > 1000){
-            msg.innerText = "Please limit the board to 50*50";
+        else if(userV * userH > 3000){
+            msg.innerText = "Please limit to 3000 cells";
             return
         }
         else if(userV % 1 !== 0 || userH % 1 !== 0 || userM % 1 !== 0){
             msg.innerText = "Please provide Integer";
             return
         }
-        else if(userV * userH - 9 - 5 - userM < 0){
+        else if(userV * userH - 9 - 6 - userM < 0){
             // Area - Immute area - Minimum safe space - MineCount >= 0 -> valid
-            msg.innerText = "Please provide wider space to put mines";
+            msg.innerText = "Please reverse 15 cells to put mines";
             return
         }
         else if(userH < 1){
@@ -127,7 +130,15 @@ $(document).ready(function(){
             return
         }
         else{
-            msg.innerText = "Custom Board Generated";
+            // Minimum mine adjustment for large boards
+            if(userV * userH > 400 && userM/(userV*userH) < 0.15){
+                userM = Math.floor(userV*userH*0.15);
+                msg.innerText = "Custom Board Generated (minimum 15% mine needed for large boards)";
+            }
+            else{
+                msg.innerText = "Custom Board Generated";
+            }
+            // Activate loader
         }
 
         // Build a customized board
@@ -176,7 +187,7 @@ class MineField{
         this.hlen = hlen || 8;    // horizontal(x) length
         this.board = [];          // the real board with mines and numbers
         this.displayBoard = [];   // the top layer board for display
-        this.revealed = 0;       // record revealed cells
+        this.revealed = 0;        // count revealed cells
         this.mines = mines || 10; // mine count, default 10
         this.minePos = [];        // for mine random generation
         this.clock = 0;            // time counter to record game length
@@ -193,6 +204,12 @@ class MineField{
                 this.displayBoard[v][h] = "_";
             }
         }
+        
+        // Mine count display & animation toggle
+        document.getElementsByClassName("mine-count")[0].innerText = "M: " + String(this.mines);
+        if(this.vlen * this.hlen <= 1000){
+            animation = true; }
+        else{ animation = false; }
         return this.board;
     }
     
@@ -232,27 +249,26 @@ class MineField{
             for(let h = 0; h < this.hlen; h++){
                 // Count surrounding mines of non-mine cells
                 if(this.board[v][h] !== "X"){
-                    let minecount = 0;
+                    let mineCount = 0;
                     // Loop through surrounding cells
-                    for(let voffset = v-1; voffset <= v+1; voffset++){
-                        for(let hoffset = h-1; hoffset <= h+1; hoffset++){
-                            // Skip cases with invalid cell value
-                            if(voffset > this.vlen-1 || hoffset > this.hlen-1 || voffset < 0 || hoffset < 0)
-                                continue;
-                            else if(!(this.board[voffset][hoffset]))
-                                continue;
-                            // Check for mines
-                            else if(this.board[voffset][hoffset] === "X")
-                                minecount++;
-                        }
+                    for(let i = 0; i < 8; i++){
+                        let lv = v + vOffset[i]; // Lookup V
+                        let lh = h + hOffset[i]; // Lookup H
+                        // Skip cases with invalid cell value
+                        if(lv > this.vlen-1 || lh > this.hlen-1 || lv < 0 || lh < 0)
+                            continue;
+                        else if(!(this.board[lv][lh]))
+                            continue;
+                        // Check for mines
+                        else if(this.board[lv][lh] === "X")
+                            mineCount++;
                     }
-                    if(minecount > 0)
-                        this.board[v][h] = String(minecount);
+                    if(mineCount > 0)
+                        this.board[v][h] = String(mineCount);
                 }
             }
         }
 
-        document.getElementsByClassName("mine-count")[0].innerText = "M: " + this.mines;
         // Runtime testing
         let codeEndTime = new Date();
         let codeRuntime = (codeEndTime - codeStartTime) / 1000;
@@ -267,7 +283,7 @@ class MineField{
             console.log(String(Number(v)+1) + " || " + this.board[v]);
         }
     }
-
+    
     // Internal command to print out the display board variable
     topLayerBoardDisplay(){
         console.log("=======Board - Top Layer=======");
@@ -275,15 +291,15 @@ class MineField{
             console.log(String(Number(v)+1) + " || " + this.displayBoard[v] + " ||");
         }
     }
-
+    
     // Action on clicked cells
     engage(vPos,hPos){
         // Runtime testing Variables
         let codeStartTime = new Date();
-
+        
         // Exit if already lost, won or cell is revealed
         if(lost || won){ return }        
-        if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){ return }
+        if(this.displayBoard[vPos][hPos] === "R"){ return }
 
         // Generate mine on first click
         if(this.revealed === 0){
@@ -291,7 +307,7 @@ class MineField{
             // Activate timer
             this.gameTimer = setInterval(clockUpdate, 1000);
         }
-
+        
         // LOSE scenario
         if(this.board[vPos][hPos] == "X"){
             // Reveal other mine cell
@@ -313,10 +329,10 @@ class MineField{
             lost = true;
             clearInterval(this.gameTimer);
         }
-
+        
         // Reveal cell
-        this.reveal(vPos, hPos);
-
+        this.reveal([vPos, hPos]);
+        
         // Trigger WIN event when successfully revealed all non-mine cells
         if(this.revealed >= this.vlen * this.hlen - this.mines){
             // Congratulation Messages
@@ -335,23 +351,73 @@ class MineField{
             won = true;
             clearInterval(this.gameTimer);
         }
-
+        
         // Runtime testing
         let codeEndTime = new Date();
         let codeRuntime = (codeEndTime - codeStartTime) / 1000;
-        console.log(called);
         console.log("Engage runtime: " + codeRuntime + "s");
         console.log(this.revealed);
     }
 
+    // Reveal mine cells, expects array of [v1,h1]
+    reveal(r){
+        /* Rule: if empty, force reveal near number and recur empty  */
+        /* else if number, reveal itself (means it can stop here) */
+        /* else if mine caused by recursive calls, ignore it directly */
+        let cellsToRecur = []; // toReveal: r = [v1,h1,v2,h2]
+        for(let i = 0; i < r.length; i = i + 2){
+            // 1. Attempt to reveal itself
+            let v = r[i];
+            let h = r[i+1];
+            /* Exit if cell is revealed or is a mine */
+            if(this.board[v][h] === "X"){ continue; }
+            else if(this.displayBoard[v][h] === "R"){ continue; }
+            else{ this.revealed += 1; }
+
+            /* reveal given target */
+            this.displayBoard[v][h] = "R";
+            this.display(v,h);
+
+
+            // 2. Attempt to reveal surroundings (when target is a empty cell)
+            if(this.board[v][h] == " "){
+                for(let j = 0; j < 8; j++){
+                    let lv = v + vOffset[j]; // Lookup V
+                    let lh = h + hOffset[j]; // Lookup H
+                    // Skip iteration if represents invalid cell
+                    if(lv > this.vlen-1 || lh > this.hlen-1 || lv < 0 || lh < 0){ continue; }
+                    // Record into array if lookup target is a unrevealed blank cell
+                    else if(this.board[lv][lh] === " " && this.displayBoard[lv][lh] !== "R"){
+                        cellsToRecur.push(lv);
+                        cellsToRecur.push(lh);
+                    }
+                    // Reveal if unrevealed AND not a mine
+                    if(this.displayBoard[lv][lh] === "R"){ continue; }
+                    else if(this.board[lv][lh] !== "X" && this.board[lv][lh] !== " "){
+                        this.displayBoard[lv][lh] = "R";
+                        this.display(lv,lh);
+                        this.revealed += 1;
+                    }
+                }
+            }
+        }
+        
+        // Recur until record becomes empty
+        console.log(cellsToRecur);
+        if(cellsToRecur.length > 0){
+            this.reveal(cellsToRecur);
+        }
+        else{
+            console.log("Stop recurring");
+        }
+    }
+
     // Special action for exposed numbers
     leftRightReveal(vPos, hPos){
-        let vOffset = [-1,-1,-1,0,0,1,1,1];
-        let hOffset = [-1,0,1,-1,1,-1,0,1];
         let flagCount = 0;
-        // Proceed if not an exposed number
-        if(/[0-8]/.test(String(this.displayBoard[vPos][hPos]))){
-            // Exit if not flagged all surrounding mines accurately
+        // Proceed if cell is an exposed number
+        if(this.displayBoard[vPos][hPos] === "R" && /[1-8]/.test(String(this.board[vPos][hPos]))){
+            // Counting surrounding flags
             for(let i = 0; i < 8; i++){
                 // Handle surrounding loop
                 let lookupV = vPos + vOffset[i];
@@ -384,39 +450,6 @@ class MineField{
             }
         }
         else{ console.log("Number reveal not triggered"); }
-    }
-
-    // Reveal the cell, called by engage() or recursively
-    /* !!!Source of evil for performance issue!!! */
-    reveal(vPos, hPos){   
-        /* Rule: if empty, force reveal near number and recur empty  */
-        /* else if number, reveal itself (means it can stop here) */
-        /* else if mine caused by recursive calls, ignore it directly */
-        called += 1;
-        
-        // Directly exit when position is a mine
-        if(this.board[vPos][hPos] === "X"){ return }
-        // Exit if the cell is revealed already.
-        if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){ return }
-        else { this.revealed += 1; }
-
-        // Reveal itself
-        if(["_","F"].indexOf(this.displayBoard[vPos][hPos]) >= 0){
-            this.displayBoard[vPos][hPos] = this.board[vPos][hPos];
-            this.display(vPos, hPos);
-        }
-
-        // If Blank, loop and reveal surroundings
-        if(this.board[vPos][hPos] === " "){
-            for(let vTemp = vPos - 1; vTemp <= vPos + 1; vTemp++){
-                for(let hTemp = hPos - 1; hTemp <= hPos + 1; hTemp++){
-                    // recursive on valid cell
-                    if(vTemp < this.vlen && hTemp < this.hlen && vTemp >= 0 && hTemp >= 0){
-                        this.reveal(vTemp,hTemp);
-                    }
-                }
-            }
-        }
     }
     
     // Display CSS effects on revealing the cells
@@ -478,8 +511,6 @@ class MineField{
     highlight(v,h,action){
         // Proceed if target is an exposed number cell
         if(/[1-8]/.test(this.displayBoard[v][h])){
-            let vOffset = [-1,-1,-1,0,0,1,1,1];
-            let hOffset = [-1,0,1,-1,1,-1,0,1];
             let cells = document.getElementsByClassName("mine-cell");
             // Loop through its surroundings;
             for(let i = 0; i < 8; i++){
@@ -503,7 +534,7 @@ class MineField{
     flag(vPos, hPos){
         let target = this.displayBoard[vPos][hPos];
         // Proceed if cell is unrevealed
-        if(target !== this.board[vPos][hPos]){
+        if(target !== "R"){
             // Toggle between flag and un-flag
             if(target !== "F"){
                 this.displayBoard[vPos][hPos] = "F";
@@ -532,7 +563,6 @@ class MineField{
     resetBoard(vLen, hLen, mineNum){
         let htmlBoard = document.getElementsByClassName("board")[0];
         let htmlHiddenBoard = document.getElementsByClassName("hidden-board")[0];
-        called = 0;
         
         // Clear current HTML table (board & hidden-board)
         while(htmlBoard.firstChild){
@@ -566,7 +596,7 @@ class MineField{
         document.getElementById("title").innerText = "Welcome to Minesweeper!"
         
         // Update time-count and mine-count in HTML display
-        document.getElementsByClassName("mine-count")[0].innerText = "M: -";
+        document.getElementsByClassName("mine-count")[0].innerText = "M: " + mineNum;
         clearInterval(this.gameTimer);
         document.getElementsByClassName("time-count")[0].innerText = "🕑: 0";
     }
@@ -591,23 +621,32 @@ console.log(myBoard.mines);
 myBoard.boardDisplay();
 myBoard.topLayerBoardDisplay();
 
-// Left + right click event listener
-var mouseTrack = {};
-var cells = document.getElementsByClassName("mine-cell");
-cells.onmousedown = cells.onmouseup = holding;
+reveal(vPos, hPos){
+        
+        // Directly exit when position is a mine
+        if(this.board[vPos][hPos] === "X"){ return }
+        // Exit if the cell is revealed already.
+        if(this.board[vPos][hPos] === this.displayBoard[vPos][hPos]){ return }
+        else { this.revealed += 1; }
 
-function holding(e){
-    e = e || event;
-    if(e.buttons === 3){
-        // Get cell row and column index
-        let domRow = this.parentNode.rowIndex;
-        let domCol = this.cellIndex;
-        console.log(domRow + " " + domCol);
+        // Reveal itself
+        if(["_","F"].indexOf(this.displayBoard[vPos][hPos]) >= 0){
+            this.displayBoard[vPos][hPos] = this.board[vPos][hPos];
+            this.display(vPos, hPos);
+        }
 
-        // Reveal number around
-        myBoard.leftRightReveal(domRow,domCol);
+        // If Blank, loop and reveal surroundings
+        if(this.board[vPos][hPos] === " "){
+            for(let vTemp = vPos - 1; vTemp <= vPos + 1; vTemp++){
+                for(let hTemp = hPos - 1; hTemp <= hPos + 1; hTemp++){
+                    // recursive on valid cell
+                    if(vTemp < this.vlen && hTemp < this.hlen && vTemp >= 0 && hTemp >= 0){
+                        this.reveal(vTemp,hTemp);
+                    }
+                }
+            }
+        }
     }
-}
 
 */
 
