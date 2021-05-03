@@ -55,6 +55,7 @@ $(document).ready(function(){
 
     // Left+Right click - onmouseup: reveal surroundings of number cell
     $(document).on("mouseup",".mine-cell", function(e){
+        // Activate after LR click is pressed beforehand
         if(holding && e.buttons === 0 && !(won) && !(lost)){
             holding = false;
 
@@ -510,7 +511,7 @@ class MineField{
     // Highlight cells in response to left+right click
     highlight(v,h,action){
         // Proceed if target is an exposed number cell
-        if(/[1-8]/.test(this.displayBoard[v][h])){
+        if(this.displayBoard[v][h] === "R" && /[1-8]/.test(this.board[v][h])){
             let cells = document.getElementsByClassName("mine-cell");
             // Loop through its surroundings;
             for(let i = 0; i < 8; i++){
