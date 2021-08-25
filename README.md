@@ -1,6 +1,6 @@
 # Minesweeper
 A modern designed web-based minesweeper game that supports board customization and responsive layout. Your goal in this game is to discover every cell on the board without touching any mine! The position of mines is hidden, but revealing non-mine cells will give you hint on where the mines may sit in the board.  
-Live web game hosted at: [https://maxwellyu.netlify.app/](https://maxwellyu.netlify.app/)
+Live web game hosted at: [https://yuyuichiu.github.io/minesweeper/minesweeper.html](https://yuyuichiu.github.io/minesweeper/minesweeper.html)
 
 ## How to play?
 Begin by clicking on the cells. The number beneath the blank indicates how many mines are hidden in the surrounding 8 cells. You win by revealing every non-mine cell but lose when revealing any mines.
